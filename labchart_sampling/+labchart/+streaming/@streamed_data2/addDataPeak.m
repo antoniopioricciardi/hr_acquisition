@@ -275,8 +275,8 @@ function checkForPeak(new_data)
     if any(new_data > 600)
         fprintf('PEAK: %s \n', datestr(now, 'HH:MM:SS.FFF'));
         if peak_detected
-            % Plot the two buffers
-            figure;
+            % Create a new figure for plotting the two buffers
+            fig = figure('Name', 'Consecutive Peaks', 'NumberTitle', 'off');
             subplot(2, 1, 1);
             plot(buffer2);
             title('Previous Buffer');
