@@ -261,7 +261,7 @@ end
 
 
 function checkForPeak(new_data)
-    persistent buffer1 buffer2 peak_detected prev_data_empty
+    persistent buffer1 buffer2 buffer3 peak_detected prev_data_empty
 
     if isempty(peak_detected)
         peak_detected = false;
@@ -273,6 +273,7 @@ function checkForPeak(new_data)
 
     % Update buffers
     buffer2 = buffer1;
+    buffer3 = buffer2;
     buffer1 = new_data;
 
     % Check if any value in new_data exceeds 600
@@ -282,7 +283,7 @@ function checkForPeak(new_data)
             % Plot the two buffers
             fig = figure('Name', 'Consecutive Peaks', 'NumberTitle', 'off');
             subplot(2, 1, 1);
-            plot(buffer2);
+            plot(buffer3);
             title('Previous Buffer');
             subplot(2, 1, 2);
             plot(buffer1);
