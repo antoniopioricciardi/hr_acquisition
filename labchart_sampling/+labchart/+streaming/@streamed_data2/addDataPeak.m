@@ -281,8 +281,8 @@ function checkForPeak(new_data)
 
 
     % update peak detection
-    prev_data_peak = peak_detected;
     prevprev_data_peak = prev_data_peak;
+    prev_data_peak = peak_detected;
 
     % Check if any value in new_data exceeds 600
     if any(new_data > 800)
@@ -293,11 +293,11 @@ function checkForPeak(new_data)
             last_peak_time = tic; % Reset the timer
         end
     else
-        if isempty(new_data)
-            fprintf('new_data is empty %s \n', datestr(now, 'HH:MM:SS.FFF'));
-        else
-            fprintf('No peak: %s \n', datestr(now, 'HH:MM:SS.FFF'));
-        end
+        %if isempty(new_data)
+        %    fprintf('new_data is empty %s \n', datestr(now, 'HH:MM:SS.FFF'));
+        %else
+        %    fprintf('No peak: %s \n', datestr(now, 'HH:MM:SS.FFF'));
+        %end
         peak_detected = false;
     end
 end
