@@ -272,8 +272,8 @@ function checkForPeak(new_data)
     end
 
     % Update buffers
-    buffer2 = buffer1;
     buffer3 = buffer2;
+    buffer2 = buffer1;
     buffer1 = new_data;
 
     % Check if any value in new_data exceeds 600
@@ -284,7 +284,7 @@ function checkForPeak(new_data)
             fig = figure('Name', 'Consecutive Peaks', 'NumberTitle', 'off');
             subplot(2, 1, 1);
             plot(buffer3);
-            title('Previous Buffer');
+            title('Buffer at time i-2');
             subplot(2, 1, 2);
             plot(buffer1);
             title('Current Buffer');
