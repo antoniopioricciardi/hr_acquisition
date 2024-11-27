@@ -282,7 +282,7 @@ function checkForPeak(new_data)
     prevprev_data_peak = prev_data_peak;
 
     % Check if any value in new_data exceeds 600
-    if any(new_data > 600)
+    if any(new_data > 800)
         peak_detected = true;
         if ~prev_data_peak && ~prevprev_data_peak
             % display the time passed since the last peak
