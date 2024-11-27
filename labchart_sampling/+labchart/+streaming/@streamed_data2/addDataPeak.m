@@ -278,7 +278,7 @@ function checkForPeak(new_data)
     % Check if any value in new_data exceeds 600
     if any(new_data > 600)
         fprintf('PEAK: %s \n', datestr(now, 'HH:MM:SS.FFF'));
-        if prev_data_empty
+        if peak_detected && prev_data_empty
             % Plot the two buffers
             fig = figure('Name', 'Consecutive Peaks', 'NumberTitle', 'off');
             subplot(2, 1, 1);
@@ -294,7 +294,6 @@ function checkForPeak(new_data)
         end
         prev_data_empty = false;
     else
-        peak_detected = false;
         % Display first 5 entries if no peak. First check whether new_data is not empty
         if isempty(new_data)
             fprintf('new_data is empty %s \n', datestr(now, 'HH:MM:SS.FFF'));
@@ -302,6 +301,7 @@ function checkForPeak(new_data)
         else
             fprintf('No peak: %s \n', datestr(now, 'HH:MM:SS.FFF'));
             prev_data_empty = false;
+            peak_detected = false;
         end
     end
 end
