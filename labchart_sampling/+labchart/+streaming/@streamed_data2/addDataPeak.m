@@ -252,6 +252,6 @@ function checkForPeak(new_data)
         % display first 5 entries if no peak. First check whether new_data is not empty
         if isempty(new_data)
             disp('new_data is empty');
-            return;
+        end
     end
 end
