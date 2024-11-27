@@ -247,13 +247,13 @@ end
 function checkForPeak(new_data)
     % Check if any value in new_data exceeds 600
     if any(new_data > 600)
-        disp('PEAK');
         % also display the current time in seconds to the millisecond, no need to display the entire new_data
-        disp(datestr(now,'HH:MM:SS.FFF'));
+        disp('PEAK', datestr(now, 'HH:MM:SS.FFF'));
+        disp();
     else
         % display first 5 entries if no peak. First check whether new_data is not empty
         if isempty(new_data)
-            disp('new_data is empty');
+            disp('new_data is empty', datestr(now, 'HH:MM:SS.FFF'));
         end
     end
 end
