@@ -278,8 +278,8 @@ function checkForPeak(new_data)
 
 
     % update peak detection
-    prevprev_data_peak = prev_data_peak;
     prev_data_peak = peak_detected;
+    prevprev_data_peak = prev_data_peak;
 
     % Check if any value in new_data exceeds 600
     if any(new_data > 600)
