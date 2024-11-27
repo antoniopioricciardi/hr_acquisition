@@ -268,10 +268,6 @@ function checkForPeak(new_data)
         peak_detected = false;
     end
 
-    if isempty(prev_data_empty)
-        prev_data_empty = false;
-    end
-
     if isempty(prev_data_peak)
         prev_data_peak = false;
     end
