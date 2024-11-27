@@ -284,7 +284,7 @@ function checkForPeak(new_data)
     % Check if any value in new_data exceeds 600
     if any(new_data > 600)
         peak_detected = true;
-        if ~prev_data_peak || ~prevprev_data_peak
+        if ~prev_data_peak && ~prevprev_data_peak
             % display the time passed since the last peak
             fprintf('PEAK: %s, Time since last peak: %.3f seconds\n', datestr(now, 'HH:MM:SS.FFF'), toc(last_peak_time));
             last_peak_time = tic; % Reset the timer
