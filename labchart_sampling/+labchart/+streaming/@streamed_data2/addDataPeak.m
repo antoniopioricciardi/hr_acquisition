@@ -253,6 +253,8 @@ function checkForPeak(new_data)
         % display first 5 entries if no peak. First check whether new_data is not empty
         if isempty(new_data)
             fprintf('new_data is empty %s \n', datestr(now, 'HH:MM:SS.FFF'));
+        else
+            fprintf('No peak: %s \n', datestr(now, 'HH:MM:SS.FFF'));
         end
     end
 end
