@@ -253,9 +253,5 @@ function checkForPeak(new_data)
         if isempty(new_data)
             disp('new_data is empty');
             return;
-        else
-            disp('NO PEAK');
-            disp(new_data(1:5));
-        end
     end
 end
