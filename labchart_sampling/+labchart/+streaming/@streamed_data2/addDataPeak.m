@@ -261,7 +261,8 @@ end
 
 
 function checkForPeak(new_data)
-    persistent buffer1 buffer2 buffer3 peak_detected prev_data_empty last_peak_time
+    % show how long it has passed between two peaks
+    persistent buffer1 buffer2 buffer3 peak_detected prev_data_empty prev_data_peak last_peak_time
 
     if isempty(peak_detected)
         peak_detected = false;
@@ -269,6 +270,10 @@ function checkForPeak(new_data)
 
     if isempty(prev_data_empty)
         prev_data_empty = false;
+    end
+
+    if isempty(prev_data_peak)
+        prev_data_peak = false;
     end
 
     if isempty(last_peak_time)
@@ -282,25 +287,10 @@ function checkForPeak(new_data)
 
     % Check if any value in new_data exceeds 600
     if any(new_data > 600)
-        if peak_detected && prev_data_empty
-            % Consider this as a continuation of the previous peak
-            prev_data_empty = false;
-        else
-            if peak_detected
-                elapsed_time = toc(last_peak_time);
-                fprintf('Time since last peak: %.3f seconds\n', elapsed_time);
-            end
+        if isempty(buffer2) && isempty(buffer3)
+            % display the time passed since the last peak
+            fprintf('PEAK: %s, Time since last peak: %.3f seconds\n', datestr(now, 'HH:MM:SS.FFF'), toc(last_peak_time));
             last_peak_time = tic; % Reset the timer
-            peak_detected = true;
-        end
-        prev_data_empty = false;
-    else
-        % Display first 5 entries if no peak. First check whether new_data is not empty
-        if isempty(new_data)
-            prev_data_empty = true;
-        else
-            prev_data_empty = false;
-            peak_detected = false;
         end
     end
 end
