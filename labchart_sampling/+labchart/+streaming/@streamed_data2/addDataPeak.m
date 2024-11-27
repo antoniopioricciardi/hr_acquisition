@@ -244,13 +244,53 @@ obj.last_grab_end = start_I + n_samples2-1;
 end
 
 
+% function checkForPeak(new_data)
+%     % Check if any value in new_data exceeds 600
+%     if any(new_data > 600)
+%         % also display the current time in seconds to the millisecond, no need to display the entire new_data
+%         fprintf('PEAK: %s \n', datestr(now, 'HH:MM:SS.FFF'));
+%     else
+%         % display first 5 entries if no peak. First check whether new_data is not empty
+%         if isempty(new_data)
+%             fprintf('new_data is empty %s \n', datestr(now, 'HH:MM:SS.FFF'));
+%         else
+%             fprintf('No peak: %s \n', datestr(now, 'HH:MM:SS.FFF'));
+%         end
+%     end
+% end
+
+
 function checkForPeak(new_data)
+    persistent buffer1 buffer2 peak_detected
+
+    if isempty(peak_detected)
+        peak_detected = false;
+    end
+
+    % Update buffers
+    buffer2 = buffer1;
+    buffer1 = new_data;
+
     % Check if any value in new_data exceeds 600
     if any(new_data > 600)
-        % also display the current time in seconds to the millisecond, no need to display the entire new_data
         fprintf('PEAK: %s \n', datestr(now, 'HH:MM:SS.FFF'));
+        if peak_detected
+            % Plot the two buffers
+            figure;
+            subplot(2, 1, 1);
+            plot(buffer2);
+            title('Previous Buffer');
+            subplot(2, 1, 2);
+            plot(buffer1);
+            title('Current Buffer');
+            % Stop the code
+            error('Two consecutive peaks detected. Stopping the code.');
+        else
+            peak_detected = true;
+        end
     else
-        % display first 5 entries if no peak. First check whether new_data is not empty
+        peak_detected = false;
+        % Display first 5 entries if no peak. First check whether new_data is not empty
         if isempty(new_data)
             fprintf('new_data is empty %s \n', datestr(now, 'HH:MM:SS.FFF'));
         else
