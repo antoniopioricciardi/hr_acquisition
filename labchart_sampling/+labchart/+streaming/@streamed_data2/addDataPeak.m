@@ -271,6 +271,9 @@ function checkForPeak(new_data)
     if isempty(prev_data_peak)
         prev_data_peak = false;
     end
+    if isempty(prevprev_data_peak)
+        prevprev_data_peak = false;
+    end
 
     if isempty(last_peak_time)
         last_peak_time = tic; % Initialize the timer
@@ -290,6 +293,11 @@ function checkForPeak(new_data)
             last_peak_time = tic; % Reset the timer
         end
     else
+        if isempty(new_data)
+            fprintf('new_data is empty %s \n', datestr(now, 'HH:MM:SS.FFF'));
+        else
+            fprintf('No peak: %s \n', datestr(now, 'HH:MM:SS.FFF'));
+        end
         peak_detected = false;
     end
 end
