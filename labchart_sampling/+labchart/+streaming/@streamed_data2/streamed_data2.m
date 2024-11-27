@@ -375,7 +375,7 @@ classdef streamed_data2 < handle
             if nargin == 2
                 %I don't know what the inputs are from LabChart, we
                 %just ignore them (use of varargin)
-                fh = @(varargin)obj.addData(h_doc);
+                fh = @(varargin)obj.addDataPeak(h_doc);
                 h_doc.registerOnNewSamplesCallback(fh);
             else
                 h__registerMultipleStreams(obj,h_doc,other_streams)
@@ -474,7 +474,7 @@ function h__newSamplesCallbackMultipleStreams(h_doc,streams)
 %   This is the actuall callback, which calls addData for each stream
     for i = 1:length(streams)
         cur_stream = streams{i};
-        cur_stream.addData(h_doc)
+        cur_stream.addDataPeak(h_doc)
     end
 end
 

@@ -105,9 +105,6 @@ try
             is_init_call = false;
             new_data = h__getData(h_doc,obj,obj.last_grab_end+1,-1);
         end
-        
-        % Check for peak in new_data
-        checkForPeak(new_data);
 
         %if 
         
@@ -241,12 +238,4 @@ n_samples2 = length(data_vector);
 %TODO: validate length is what we expect if n_samples is not -1
 %-1 means grab all
 obj.last_grab_end = start_I + n_samples2-1;
-end
-
-
-function checkForPeak(new_data)
-    % Check if any value in new_data exceeds 600
-    if any(new_data > 600)
-        disp('PEAK');
-    end
 end
