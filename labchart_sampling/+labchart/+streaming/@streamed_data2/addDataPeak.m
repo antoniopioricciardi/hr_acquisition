@@ -249,8 +249,13 @@ function checkForPeak(new_data)
     if any(new_data > 600)
         disp('PEAK');
     else
-        disp('NO PEAK');
-        % display first 5 entries if no peak
-        disp(new_data(1:5));
+        % display first 5 entries if no peak. First check whether new_data is not empty
+        if isempty(new_data)
+            disp('new_data is empty');
+            return;
+        else
+            disp('NO PEAK');
+            disp(new_data(1:5));
+        end
     end
 end
