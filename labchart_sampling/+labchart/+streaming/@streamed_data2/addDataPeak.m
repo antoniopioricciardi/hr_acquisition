@@ -248,6 +248,8 @@ function checkForPeak(new_data)
     % Check if any value in new_data exceeds 600
     if any(new_data > 600)
         disp('PEAK');
+        % also display the current time
+        disp(datetime('now'));
     else
         % display first 5 entries if no peak. First check whether new_data is not empty
         if isempty(new_data)
