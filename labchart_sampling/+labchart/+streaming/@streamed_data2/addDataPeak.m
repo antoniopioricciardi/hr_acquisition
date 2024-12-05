@@ -107,7 +107,8 @@ try
         end
         
         % Check for peak in new_data
-        checkForPeak(new_data);
+        % checkForPeak(new_data);
+        avgbpm(new_data);
 
         %if 
         
@@ -259,6 +260,34 @@ end
 %     end
 % end
 
+function avgbpm(new_data)
+    % Compute the average beats per minute (BPM) over a sample of 5 seconds
+    persistent peak_times
+
+    if isempty(peak_times)
+        peak_times = [];
+    end
+
+    current_time = now;
+
+    % Check if any value in new_data exceeds 800
+    if any(new_data > 800)
+        % Add the current time to the list of peak times
+        peak_times = [peak_times, current_time];
+    end
+
+    % Remove peak times that are older than 5 seconds
+    peak_times = peak_times(peak_times >= (current_time - 5/86400)); % 5 seconds in days
+
+    % Calculate the number of peaks in the last 5 seconds
+    num_peaks = length(peak_times);
+
+    % Calculate the average BPM
+    avg_bpm = (num_peaks / 5) * 60;
+
+    % Display the average BPM
+    fprintf('Average BPM over the last 5 seconds: %.2f\n', avg_bpm);
+end
 
 function checkForPeak(new_data)
     % Check if any value in new_data exceeds 800.
