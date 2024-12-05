@@ -261,44 +261,34 @@ end
 
 
 function checkForPeak(new_data)
-    % show how long it has passed between two peaks
-    persistent buffer1 peak_detected prev_data_peak prevprev_data_peak last_peak_time
-
-    if isempty(peak_detected)
-        peak_detected = false;
-    end
-
-    if isempty(prev_data_peak)
-        prev_data_peak = false;
-    end
-    if isempty(prevprev_data_peak)
-        prevprev_data_peak = false;
-    end
+    % Check if any value in new_data exceeds 800.
+    % If a peak is detected, display the time passed since the last peak.
+    
+    persistent last_peak_time peak_detected
 
     if isempty(last_peak_time)
         last_peak_time = tic; % Initialize the timer
     end
 
+    if isempty(peak_detected)
+        peak_detected = false;
+    end
 
-    % update peak detection
-    prevprev_data_peak = prev_data_peak;
-    prev_data_peak = peak_detected;
-
-    % Check if any value in new_data exceeds 600
-    if any(new_data > 800)
-        peak_detected = true;
-        if ~(prev_data_peak || prevprev_data_peak)
-            % display the time passed since the last peak
-            fprintf('PEAK: %s, Time since last peak: %.3f seconds\n', datestr(now, 'HH:MM:SS.FFF'), toc(last_peak_time));
-            last_peak_time = tic; % Reset the timer
-        end
-    else
-        if isempty(new_data)
-            fprintf('new_data is empty %s \n', datestr(now, 'HH:MM:SS.FFF'));
+    if ~isempty(new_data)
+        % Check if any value in new_data exceeds 800
+        if any(new_data > 800)
+            if ~peak_detected
+                % Display the time passed since the last peak
+                fprintf('PEAK: %s, Time since last peak: %.3f seconds\n', datestr(now, 'HH:MM:SS.FFF'), toc(last_peak_time));
+                last_peak_time = tic; % Reset the timer
+                peak_detected = true;
+            else
+                fprintf('Consecutive PEAK detected, ignoring this peak: %s\n', datestr(now, 'HH:MM:SS.FFF'));
+            end
         else
             fprintf('No peak: %s \n', datestr(now, 'HH:MM:SS.FFF'));
+            peak_detected = false;
         end
-        peak_detected = false;
     end
 end
 
