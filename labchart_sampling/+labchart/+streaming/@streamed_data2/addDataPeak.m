@@ -283,10 +283,10 @@ function avgbpm(new_data)
 
     % Calculate the number of peaks in the last 5 seconds
     num_peaks = length(peak_times);
+    fprintf('num_peaks: %d\n', num_peaks);
 
     % Calculate the average BPM
     avg_bpm = (num_peaks / 5) * 60;
-
     % Print the average BPM every 5 seconds
     if toc(last_print_time) >= 5
         fprintf('Average BPM over the last 5 seconds: %.2f\n', avg_bpm);
