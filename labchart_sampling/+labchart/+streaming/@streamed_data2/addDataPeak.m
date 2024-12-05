@@ -309,7 +309,7 @@ function avgbpm(new_data)
     avg_bpm = (num_peaks / 10) * 60;
 
     % Display the rolling heart rate
-    fprintf('Rolling heart rate over the last 10 seconds: %.2f BPM\n', avg_bpm);
+    % fprintf('Rolling heart rate over the last 10 seconds: %.2f BPM\n', avg_bpm);
 end
 
 function checkForPeak(new_data)
