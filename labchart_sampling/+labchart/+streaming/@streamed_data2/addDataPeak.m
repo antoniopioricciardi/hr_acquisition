@@ -262,10 +262,14 @@ end
 
 function avgbpm(new_data)
     % Compute the average beats per minute (BPM) over a sample of 5 seconds
-    persistent peak_times
+    persistent peak_times last_print_time
 
     if isempty(peak_times)
         peak_times = [];
+    end
+
+    if isempty(last_print_time)
+        last_print_time = tic; % Initialize the timer
     end
 
     current_time = now;
@@ -285,9 +289,13 @@ function avgbpm(new_data)
     % Calculate the average BPM
     avg_bpm = (num_peaks / 5) * 60;
 
-    % Display the average BPM
-    fprintf('Average BPM over the last 5 seconds: %.2f\n', avg_bpm);
+    % Print the average BPM every 5 seconds
+    if toc(last_print_time) >= 5
+        fprintf('Average BPM over the last 5 seconds: %.2f\n', avg_bpm);
+        last_print_time = tic; % Reset the timer
+    end
 end
+
 
 function checkForPeak(new_data)
     % Check if any value in new_data exceeds 800.
