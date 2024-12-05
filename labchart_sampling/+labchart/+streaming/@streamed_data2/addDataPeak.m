@@ -277,7 +277,7 @@ function syncPeakNaive(new_data)
             % Wait for 200ms
             pause(0.2);
             % Print "Signal" and time elapsed after 200ms
-            fprintf('Signal: %.3f', toc(now))
+            fprintf('Signal: %.3f\n', toc(now))
             peak_detected = true;
         end
     else
