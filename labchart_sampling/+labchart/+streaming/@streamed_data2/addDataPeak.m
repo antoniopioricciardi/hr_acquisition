@@ -280,6 +280,7 @@ function avgbpm(new_data)
         % Calculate the time passed since the last peak
         if length(peak_times) > 1
             time_passed = peak_times(end) - peak_times(end-1);
+            fprintf('Time passed since the last peak: %.3f seconds\n', time_passed);
             % Calculate the heart rate
             heart_rate = 60 / time_passed;
             fprintf('Heart rate: %.2f BPM\n', heart_rate);
