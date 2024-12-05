@@ -260,6 +260,29 @@ end
 %     end
 % end
 
+function syncPeakNaive(new_data)
+    % Print "PEAK" exactly 200ms after detecting a peak
+    persistent peak_detected
+
+    if isempty(peak_detected)
+        peak_detected = false;
+    end
+
+    % Check if any value in new_data exceeds 800
+    if any(new_data > 800)
+        if ~peak_detected
+            % Wait for 200ms
+            pause(0.2);
+            % Print "PEAK"
+            fprintf('PEAK: %s\n', datestr(now, 'HH:MM:SS.FFF'));
+            peak_detected = true;
+        end
+    else
+        peak_detected = false;
+    end
+end
+
+
 function avgbpm(new_data)
     % Compute the rolling heart rate (BPM) over the last 10 seconds
     persistent peak_times last_peak_time peak_detected print_counter
