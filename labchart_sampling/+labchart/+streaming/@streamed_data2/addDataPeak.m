@@ -276,7 +276,7 @@ function avgbpm(new_data)
         peak_detected = false;
     end
 
-    if isempty(elapsed_time)
+    if isempty(print_counter)
         print_counter = tic;
     end
     current_time = toc(last_peak_time);
@@ -311,8 +311,8 @@ function avgbpm(new_data)
     % Calculate the average BPM
     avg_bpm = (num_peaks / 10) * 60;
 
-    % Display the rolling heart rate every 5 seconds
-    if toc(print_counter) >= 5
+    % Display the rolling heart rate every 2 seconds
+    if toc(print_counter) >= 2
         % Display the rolling heart rate
         fprintf('Rolling heart rate over the last 10 seconds: %.2f BPM\n', avg_bpm);
     end
