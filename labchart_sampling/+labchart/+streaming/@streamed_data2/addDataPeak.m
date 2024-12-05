@@ -261,42 +261,55 @@ end
 % end
 
 function avgbpm(new_data)
-    % Compute the heart rate (BPM) based on the time passed since the last peak
-    persistent last_peak_time peak_times
-
-    if isempty(last_peak_time)
-        last_peak_time = tic; % Initialize the timer
-    end
+    % Compute the rolling heart rate (BPM) over the last 10 seconds
+    persistent peak_times last_peak_time peak_detected
 
     if isempty(peak_times)
         peak_times = [];
     end
 
-    % Check if any value in new_data exceeds 800
-    if any(new_data > 800)
-        current_time = toc(last_peak_time);
-        peak_times = [peak_times, current_time];
-        
-        % Calculate the time passed since the last peak
-        if length(peak_times) > 1
-            time_passed = peak_times(end) - peak_times(end-1);
-            fprintf('Time passed since the last peak: %.3f seconds\n', time_passed);
-            % Calculate the heart rate
-            heart_rate = 60 / time_passed;
-            fprintf('Heart rate: %.2f BPM\n', heart_rate);
-        end
-        
-        % Check if 5 seconds have passed since the first peak
-        if current_time >= 5
-            % Calculate the average BPM over the last 5 seconds
-            num_peaks = length(peak_times);
-            avg_bpm = (num_peaks / current_time) * 60;
-            fprintf('Average BPM over the last %.2f seconds: %.2f\n', current_time, avg_bpm);
-            % Reset the timer and peak times
-            last_peak_time = tic;
-            peak_times = [];
+    if isempty(last_peak_time)
+        last_peak_time = tic; % Initialize the timer
+    end
+
+    if isempty(peak_detected)
+        peak_detected = false;
+    end
+
+    current_time = toc(last_peak_time);
+
+    if ~isempty(new_data)
+        % Check if any value in new_data exceeds 800
+        if any(new_data > 800)
+            if ~peak_detected
+                % Add the current time to the list of peak times
+                peak_times = [peak_times, current_time];
+                % Calculate the time passed since the last peak
+                if length(peak_times) > 1
+                    time_passed = peak_times(end) - peak_times(end-1);
+                    fprintf('Time passed since the last peak: %.3f seconds\n', time_passed);
+                    % Calculate the heart rate
+                    heart_rate = 60 / time_passed;
+                    fprintf('Heart rate: %.2f BPM\n', heart_rate);
+                end
+                peak_detected = true;
+            end
+        else
+            peak_detected = false;
         end
     end
+
+    % Remove peak times that are older than 10 seconds
+    peak_times = peak_times(peak_times >= (current_time - 10));
+
+    % Calculate the number of peaks in the last 10 seconds
+    num_peaks = length(peak_times);
+
+    % Calculate the average BPM
+    avg_bpm = (num_peaks / 10) * 60;
+
+    % Display the rolling heart rate
+    fprintf('Rolling heart rate over the last 10 seconds: %.2f BPM\n', avg_bpm);
 end
 
 function checkForPeak(new_data)
