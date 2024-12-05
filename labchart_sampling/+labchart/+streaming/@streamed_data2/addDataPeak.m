@@ -272,16 +272,14 @@ function avgbpm(new_data)
         last_print_time = tic; % Initialize the timer
     end
 
-    current_time = now;
-
     % Check if any value in new_data exceeds 800
     if any(new_data > 800)
         % Add the current time to the list of peak times
-        peak_times = [peak_times, current_time];
+        peak_times = [peak_times, toc(last_print_time)];
     end
 
     % Remove peak times that are older than 5 seconds
-    peak_times = peak_times(peak_times >= (current_time - 5/86400)); % 5 seconds in days
+    peak_times = peak_times(peak_times >= (toc(last_print_time) - 5));
 
     % Calculate the number of peaks in the last 5 seconds
     num_peaks = length(peak_times);
@@ -293,6 +291,7 @@ function avgbpm(new_data)
     if toc(last_print_time) >= 5
         fprintf('Average BPM over the last 5 seconds: %.2f\n', avg_bpm);
         last_print_time = tic; % Reset the timer
+        peak_times = []; % Reset peak times
     end
 end
 
