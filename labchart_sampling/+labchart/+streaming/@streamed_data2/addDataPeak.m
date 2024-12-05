@@ -261,37 +261,40 @@ end
 % end
 
 function avgbpm(new_data)
-    % Compute the average beats per minute (BPM) over a sample of 5 seconds
-    persistent peak_times last_print_time
+    % Compute the heart rate (BPM) based on the time passed since the last peak
+    persistent last_peak_time peak_times
+
+    if isempty(last_peak_time)
+        last_peak_time = tic; % Initialize the timer
+    end
 
     if isempty(peak_times)
         peak_times = [];
     end
 
-    if isempty(last_print_time)
-        last_print_time = tic; % Initialize the timer
-    end
-
     % Check if any value in new_data exceeds 800
     if any(new_data > 800)
-        % Add the current time to the list of peak times
-        peak_times = [peak_times, toc(last_print_time)];
-    end
-
-    % Remove peak times that are older than 5 seconds
-    peak_times = peak_times(peak_times >= (toc(last_print_time) - 15));
-
-    % Calculate the number of peaks in the last 5 seconds
-    num_peaks = length(peak_times);
-
-    % Calculate the average BPM
-    avg_bpm = (num_peaks / 15) * 60;
-
-    % Print the average BPM every 5 seconds
-    if toc(last_print_time) >= 15
-        fprintf('Average BPM over the last 5 seconds: %.2f\n', avg_bpm);
-        last_print_time = tic; % Reset the timer
-        peak_times = []; % Reset peak times
+        current_time = toc(last_peak_time);
+        peak_times = [peak_times, current_time];
+        
+        % Calculate the time passed since the last peak
+        if length(peak_times) > 1
+            time_passed = peak_times(end) - peak_times(end-1);
+            % Calculate the heart rate
+            heart_rate = 60 / time_passed;
+            fprintf('Heart rate: %.2f BPM\n', heart_rate);
+        end
+        
+        % Check if 5 seconds have passed since the first peak
+        if current_time >= 5
+            % Calculate the average BPM over the last 5 seconds
+            num_peaks = length(peak_times);
+            avg_bpm = (num_peaks / current_time) * 60;
+            fprintf('Average BPM over the last %.2f seconds: %.2f\n', current_time, avg_bpm);
+            % Reset the timer and peak times
+            last_peak_time = tic;
+            peak_times = [];
+        end
     end
 end
 
