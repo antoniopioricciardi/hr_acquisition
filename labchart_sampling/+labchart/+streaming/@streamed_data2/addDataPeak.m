@@ -272,10 +272,11 @@ function syncPeakNaive(new_data)
     % Check if any value in new_data exceeds 800
     if any(new_data > 800)
         if ~peak_detected
+            fprintf('PEAK detected: %s\n', datestr(now, 'HH:MM:SS.FFF'));
             % Wait for 200ms
             pause(0.2);
             % Print "PEAK"
-            fprintf('PEAK: %s\n', datestr(now, 'HH:MM:SS.FFF'));
+            fprintf('Signal: %s\n', datestr(now, 'HH:MM:SS.FFF'));
             peak_detected = true;
         end
     else
