@@ -108,7 +108,8 @@ try
         
         % Check for peak in new_data
         % checkForPeak(new_data);
-        avgbpm(new_data);
+        % avgbpm(new_data);
+        syncPeakNaive(new_data);
 
         %if 
         
