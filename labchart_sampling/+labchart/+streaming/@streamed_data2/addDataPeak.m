@@ -113,7 +113,7 @@ try
         % Check for peak in new_data
         % checkForPeak(new_data);
         % avgbpm(new_data);
-        syncPeakNaive(new_data);
+        syncPeakNaive(new_data, y);
 
         %if 
         
@@ -265,7 +265,7 @@ end
 %     end
 % end
 
-function syncPeakNaive(new_data)
+function syncPeakNaive(new_data, y)
     % Print "PEAK" exactly 200ms after detecting a peak
     persistent peak_detected
 
