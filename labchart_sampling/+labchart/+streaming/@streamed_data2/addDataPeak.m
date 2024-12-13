@@ -20,6 +20,23 @@ if isempty(sound_y) || isempty(sound_Fs)
     sound_y = y;
     sound_Fs = Fs;
 end
+
+
+persistent heartbeat_y heartbeat_Fs;
+heartbeat_Fs = 44100; % Sampling frequency
+t = 0:1/heartbeat_Fs:0.5; % Time vector for 0.5 seconds
+
+% Parameters for the thud
+f = 60; % Low frequency for the thud (Hz)
+thud = sin(2 * pi * f * t); % Low-frequency sine wave
+
+% Apply a Gaussian envelope for attack and decay
+envelope = exp(-10 * t); % Exponential decay
+heartbeat_y = thud .* envelope; % Modulate the sine wave with the envelope
+
+% Normalize the signal to avoid clipping
+heartbeat_y = heartbeat_y / max(abs(heartbeat_y));
+
 try
     if ~obj.error_thrown
         
@@ -121,7 +138,7 @@ try
         % Check for peak in new_data
         % checkForPeak(new_data);
         % avgbpm(new_data);
-        syncPeakNaive(new_data, sound_y);
+        syncPeakNaive(new_data, heartbeat_y, heartbeat_Fs);
 
         %if 
         
@@ -273,7 +290,7 @@ end
 %     end
 % end
 
-function syncPeakNaive(new_data, y)
+function syncPeakNaive(new_data, wave, sampling)
     % Print "PEAK" exactly 200ms after detecting a peak
     persistent peak_detected
 
@@ -286,7 +303,7 @@ function syncPeakNaive(new_data, y)
         if ~peak_detected
             now = tic;
             fprintf('PEAK detected: %.3f\n', now)%, 'HH:MM:SS.FFF'));
-            sound(y);
+            sound(wave, sampling);
             % Wait for 200ms
             pause(0.2);
             % Print "Signal" and time elapsed after 200ms
