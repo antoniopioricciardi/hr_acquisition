@@ -7,7 +7,7 @@ function addDataPeak(obj,h_doc)
 %Note, we wrap everything in a try/catch so that
 %if this is broken it only throws 1 error then
 %stops running ...
-
+load gong.mat;
 try
     if ~obj.error_thrown
         
@@ -274,6 +274,7 @@ function syncPeakNaive(new_data)
         if ~peak_detected
             now = tic;
             fprintf('PEAK detected: %.3f\n', now)%, 'HH:MM:SS.FFF'));
+            sound(y);
             % Wait for 200ms
             pause(0.2);
             % Print "Signal" and time elapsed after 200ms
