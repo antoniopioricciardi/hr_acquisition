@@ -8,13 +8,14 @@ function addDataPeak(obj,h_doc)
 %if this is broken it only throws 1 error then
 %stops running ...
 
-persistent sound_y sound_Fs;
-if isempty(sound_y) || isempty(sound_Fs)
-    Fs = 44100; % Sampling frequency
-    t = 0:1/Fs:1; % Time vector for 1 second
-    f = 440; % Frequency of the sine wave (A4 note)
-    y = sin(2 * pi * f * t); % Generate the sine wave
-end
+load gong.mat sound_y sound_Fs;
+% persistent sound_y sound_Fs;
+% if isempty(sound_y) || isempty(sound_Fs)
+%     Fs = 44100; % Sampling frequency
+%     t = 0:1/Fs:1; % Time vector for 1 second
+%     f = 440; % Frequency of the sine wave (A4 note)
+%     y = sin(2 * pi * f * t); % Generate the sine wave
+% end
 try
     if ~obj.error_thrown
         
