@@ -16,7 +16,9 @@ if isempty(sound_y) || isempty(sound_Fs)
     % f = 440; % Frequency of the sine wave (A4 note)
     % sound_y = sin(2 * pi * f * t); % Generate the sine wave
     % sound_Fs = Fs;
-    load gong.mat sound_y sound_Fs;
+    load gong.mat y Fs;
+    sound_y = y;
+    sound_Fs = Fs;
 end
 try
     if ~obj.error_thrown
