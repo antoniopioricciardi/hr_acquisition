@@ -138,7 +138,7 @@ try
         % Check for peak in new_data
         % checkForPeak(new_data);
         % avgbpm(new_data);
-        delay = 0.5;
+        delay = 0.2;
         syncPeakNaive(new_data, delay, heartbeat_y, heartbeat_Fs);
 
         %if 
