@@ -286,7 +286,7 @@ classdef streamed_data2 < handle
             in.buffer_muliplier = 10;
             in.callback = [];
             in.callback_only_when_ready = true;
-            in.h_axes = [];
+            % in.h_axes = [];
             in.new_data_processor = [];
             in.new_data_processor2 = [];
             in.plot_options = {};
@@ -314,49 +314,49 @@ classdef streamed_data2 < handle
             obj.callback = in.callback;
             obj.callback_only_when_ready = in.callback_only_when_ready;
             
-            obj.h_axes = in.h_axes;
+            % obj.h_axes = in.h_axes;
             obj.new_data_processor = in.new_data_processor;
             obj.new_data_processor2 = in.new_data_processor2;
             obj.plot_options = in.plot_options;
             obj.remove_sample_hold = in.remove_sample_hold;
         end
-        %TODO: Can we do a specific unregister call?
-        %       - in other words, currently the only unregister we call
-        %       is for everything, can we be more precise?
-        %TODO: What happens if we register twice???
-        function pipeline = getPipeline(obj)
+        % %TODO: Can we do a specific unregister call?
+        % %       - in other words, currently the only unregister we call
+        % %       is for everything, can we be more precise?
+        % %TODO: What happens if we register twice???
+        % function pipeline = getPipeline(obj)
             
-            pipeline = {'Data requested from Labchart'};
-            if obj.decimation_step_size ~= 1
-                pipeline = [pipeline; ...
-                    sprintf('Removing sample/hold, keeping every %d sample',obj.decimation_step_size)];
-            end
+        %     pipeline = {'Data requested from Labchart'};
+        %     if obj.decimation_step_size ~= 1
+        %         pipeline = [pipeline; ...
+        %             sprintf('Removing sample/hold, keeping every %d sample',obj.decimation_step_size)];
+        %     end
             
-            if ~isempty(obj.new_data_processor)
-                pipeline = [pipeline; 
-                    sprintf('Processing new data before plotting with %s',func2str(obj.new_data_processor))];
-            end
+        %     if ~isempty(obj.new_data_processor)
+        %         pipeline = [pipeline; 
+        %             sprintf('Processing new data before plotting with %s',func2str(obj.new_data_processor))];
+        %     end
             
-            if isvalid(obj.h_axes)
-               %TODO: Really we need a switch on whether initialized or not
-               %if initialized we need to check line status
-               pipeline = [pipeline; 
-                    'Plotting new data'];
-            end
+        %     if isvalid(obj.h_axes)
+        %        %TODO: Really we need a switch on whether initialized or not
+        %        %if initialized we need to check line status
+        %        pipeline = [pipeline; 
+        %             'Plotting new data'];
+        %     end
             
-            if ~isempty(obj.new_data_processor2)
-                pipeline = [pipeline; 
-                    sprintf('Processing new data after plotting with %s',func2str(obj.new_data_processor2))];
-            end
+        %     if ~isempty(obj.new_data_processor2)
+        %         pipeline = [pipeline; 
+        %             sprintf('Processing new data after plotting with %s',func2str(obj.new_data_processor2))];
+        %     end
             
-            pipeline = [pipeline; 
-                    'Data added to buffer'];
+        %     pipeline = [pipeline; 
+        %             'Data added to buffer'];
                 
-            if ~isempty(obj.callback)
-                pipeline = [pipeline; 
-                    sprintf('Callback after data has been placed in buffer: %s',func2str(obj.callback))];
-            end    
-        end
+        %     if ~isempty(obj.callback)
+        %         pipeline = [pipeline; 
+        %             sprintf('Callback after data has been placed in buffer: %s',func2str(obj.callback))];
+        %     end    
+        % end
         function register(obj,h_doc,other_streams)
             %
             %   register(obj,h_doc,*other_streams)
