@@ -8,9 +8,12 @@ function addDataPeak(obj,h_doc)
 %if this is broken it only throws 1 error then
 %stops running ...
 
-persistent y Fs;
-if isempty(y) || isempty(Fs)
-    load gong.mat y Fs;
+persistent sound_y sound_Fs;
+if isempty(sound_y) || isempty(sound_Fs)
+    Fs = 44100; % Sampling frequency
+    t = 0:1/Fs:1; % Time vector for 1 second
+    f = 440; % Frequency of the sine wave (A4 note)
+    y = sin(2 * pi * f * t); % Generate the sine wave
 end
 try
     if ~obj.error_thrown
@@ -113,7 +116,7 @@ try
         % Check for peak in new_data
         % checkForPeak(new_data);
         % avgbpm(new_data);
-        syncPeakNaive(new_data, y);
+        syncPeakNaive(new_data, sound_y);
 
         %if 
         
