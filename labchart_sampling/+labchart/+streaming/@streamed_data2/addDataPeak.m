@@ -8,7 +8,10 @@ function addDataPeak(obj,h_doc)
 %if this is broken it only throws 1 error then
 %stops running ...
 
-load gong.mat y Fs;
+persistent y Fs;
+if isempty(y) || isempty(Fs)
+    load gong.mat y Fs;
+end
 try
     if ~obj.error_thrown
         
