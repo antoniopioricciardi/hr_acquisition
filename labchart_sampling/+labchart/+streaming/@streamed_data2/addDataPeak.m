@@ -138,7 +138,8 @@ try
         % Check for peak in new_data
         % checkForPeak(new_data);
         % avgbpm(new_data);
-        syncPeakNaive(new_data, heartbeat_y, heartbeat_Fs);
+        delay = 0.5;
+        syncPeakNaive(new_data, delay, heartbeat_y, heartbeat_Fs);
 
         %if 
         
@@ -290,7 +291,7 @@ end
 %     end
 % end
 
-function syncPeakNaive(new_data, wave, sampling)
+function syncPeakNaive(new_data, delay, wave, sampling)
     % Print "PEAK" exactly 200ms after detecting a peak
     persistent peak_detected
 
@@ -305,7 +306,7 @@ function syncPeakNaive(new_data, wave, sampling)
             fprintf('PEAK detected: %.3f\n', now)%, 'HH:MM:SS.FFF'));
             sound(wave, sampling);
             % Wait for 200ms
-            pause(0.2);
+            pause(delay);
             % Print "Signal" and time elapsed after 200ms
             fprintf('Signal: %.3f\n', toc(now))
             peak_detected = true;
