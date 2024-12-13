@@ -382,53 +382,53 @@ classdef streamed_data2 < handle
             end
         end
         
-        function [user_data,time] = getData(obj)
-            %
-            %   [user_data,time] = getData(obj)
-            %
-            %   
-            %   
+%         function [user_data,time] = getData(obj)
+%             %
+%             %   [user_data,time] = getData(obj)
+%             %
+%             %   
+%             %   
             
-            %TODO: Add time
-            last_I = obj.last_valid_I;
-            n_valid_goal = obj.n_samples_keep_valid;
-            if last_I < n_valid_goal
-                user_data = obj.data(1:last_I);
-            else
-                user_data = obj.data(last_I-n_valid_goal+1:last_I);
-            end
+%             %TODO: Add time
+%             last_I = obj.last_valid_I;
+%             n_valid_goal = obj.n_samples_keep_valid;
+%             if last_I < n_valid_goal
+%                 user_data = obj.data(1:last_I);
+%             else
+%                 user_data = obj.data(last_I-n_valid_goal+1:last_I);
+%             end
             
-            if nargout == 2
-%             x1 = obj.last_grab_start/obj.ticks_per_second;
-%             x2 = obj.last_grab_end/obj.ticks_per_second;
-%             x = x1:obj.data_dt:x2;
-                n_samples_data = length(user_data);
+%             if nargout == 2
+% %             x1 = obj.last_grab_start/obj.ticks_per_second;
+% %             x2 = obj.last_grab_end/obj.ticks_per_second;
+% %             x = x1:obj.data_dt:x2;
+%                 n_samples_data = length(user_data);
                 
-                %Let's say our step size is 10
-                %grabbed from 11 to 60
-                %1,11,21,31,41,51  <= samples we've kept
-                %   1  2  3  4  5  <= indices for our grab (5 samples
-                %   keeping)
-                %
-                %
-                %s2 = 60 - 10 + 1 => 51
-                %s1 = 51 - 10*(5-1)
-                %     51 - 40 => 11
+%                 %Let's say our step size is 10
+%                 %grabbed from 11 to 60
+%                 %1,11,21,31,41,51  <= samples we've kept
+%                 %   1  2  3  4  5  <= indices for our grab (5 samples
+%                 %   keeping)
+%                 %
+%                 %
+%                 %s2 = 60 - 10 + 1 => 51
+%                 %s1 = 51 - 10*(5-1)
+%                 %     51 - 40 => 11
                 
-                s2 = obj.last_grab_end; %This is slightly off if we decimate
-                s2 = s2 - obj.decimation_step_size+1;
-                s1 = s2 - obj.decimation_step_size*(n_samples_data-1);
+%                 s2 = obj.last_grab_end; %This is slightly off if we decimate
+%                 s2 = s2 - obj.decimation_step_size+1;
+%                 s1 = s2 - obj.decimation_step_size*(n_samples_data-1);
                 
-                %Samples to time ...
-                x1 = s1/obj.ticks_per_second;
-                x2 = s2/obj.ticks_per_second;
+%                 %Samples to time ...
+%                 x1 = s1/obj.ticks_per_second;
+%                 x2 = s2/obj.ticks_per_second;
                 
-                time = x1:obj.data_dt:x2;                
+%                 time = x1:obj.data_dt:x2;                
                 
-            else
-                time = [];
-            end
-        end
+%             else
+%                 time = [];
+%             end
+%         end
         function reset(obj)
             %??? reset performance???
             obj.block_initialized = false;
