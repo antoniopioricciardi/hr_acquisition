@@ -178,51 +178,51 @@ try
         %     end
         % end
         
-        % %Processing after plotting
-        % %----------------------------------------------------------
-        % if ~isempty(obj.new_data_processor2)
-        %     temp_data = new_data; %for debugging
-        %     new_data = obj.new_data_processor2(temp_data,is_init_call);
-        % end
+        %Processing after plotting
+        %----------------------------------------------------------
+        if ~isempty(obj.new_data_processor2)
+            temp_data = new_data; %for debugging
+            new_data = obj.new_data_processor2(temp_data,is_init_call);
+        end
         
-        % %Adding data to buffer for analysis
-        % %----------------------------------------------------------
-        % if length(new_data) > obj.n_samples_keep_valid
-        %     obj.data = new_data(end-obj.n_samples_keep_valid+1:end);
-        %     obj.last_valid_I = length(obj.data);
-        % elseif length(new_data) + obj.last_valid_I > obj.buffer_size
-        %     obj.n_buffer_resets = obj.n_buffer_resets + 1;
-        %     %Example:
-        %     %keep 20 valid
-        %     %95 - last_valid_I
-        %     %we now have 13 new samples
-        %     %
-        %     %   13 new samples go in from 20-13+1 to 20
-        %     %
-        %     start1 = obj.n_samples_keep_valid-length(new_data)+1;
-        %     end1 = obj.n_samples_keep_valid;
-        %     %don't want to pollute data before shuffling
-        %     %obj.data(start1:end1) = new_data;
+        %Adding data to buffer for analysis
+        %----------------------------------------------------------
+        if length(new_data) > obj.n_samples_keep_valid
+            obj.data = new_data(end-obj.n_samples_keep_valid+1:end);
+            obj.last_valid_I = length(obj.data);
+        elseif length(new_data) + obj.last_valid_I > obj.buffer_size
+            obj.n_buffer_resets = obj.n_buffer_resets + 1;
+            %Example:
+            %keep 20 valid
+            %95 - last_valid_I
+            %we now have 13 new samples
+            %
+            %   13 new samples go in from 20-13+1 to 20
+            %
+            start1 = obj.n_samples_keep_valid-length(new_data)+1;
+            end1 = obj.n_samples_keep_valid;
+            %don't want to pollute data before shuffling
+            %obj.data(start1:end1) = new_data;
             
-        %     %
-        %     %   We still need 7 samples, grab from 95 backwards
-        %     %           95-n_samples_grab+1:95
-        %     %
-        %     n_samples_grab = obj.n_samples_keep_valid-length(new_data);
-        %     start2 = obj.last_valid_I-n_samples_grab+1;
-        %     end2 = obj.last_valid_I;
+            %
+            %   We still need 7 samples, grab from 95 backwards
+            %           95-n_samples_grab+1:95
+            %
+            n_samples_grab = obj.n_samples_keep_valid-length(new_data);
+            start2 = obj.last_valid_I-n_samples_grab+1;
+            end2 = obj.last_valid_I;
             
-        %     obj.data(1:n_samples_grab) = obj.data(start2:end2);
-        %     %do this after internal shuffling;
-        %     obj.data(start1:end1) = new_data;
+            obj.data(1:n_samples_grab) = obj.data(start2:end2);
+            %do this after internal shuffling;
+            obj.data(start1:end1) = new_data;
             
-        %     obj.last_valid_I = obj.n_samples_keep_valid;
-        % else
-        %     obj.n_simple_adds = obj.n_simple_adds + 1;
-        %     start_I = obj.last_valid_I+1;
-        %     end_I = obj.last_valid_I+length(new_data);
-        %     obj.data(start_I:end_I) = new_data;
-        %     obj.last_valid_I = end_I;
+            obj.last_valid_I = obj.n_samples_keep_valid;
+        else
+            obj.n_simple_adds = obj.n_simple_adds + 1;
+            start_I = obj.last_valid_I+1;
+            end_I = obj.last_valid_I+length(new_data);
+            obj.data(start_I:end_I) = new_data;
+            obj.last_valid_I = end_I;
         end
         
         obj.new_data = new_data;
