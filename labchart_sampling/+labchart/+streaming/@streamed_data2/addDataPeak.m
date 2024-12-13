@@ -161,10 +161,10 @@ try
         %NOTE: Due to use of data_dt we can't downsample here (otherwise we
         %would need to support updating the data_dt property)
         %... Eventually we should support this ...
-        if ~isempty(obj.new_data_processor)
-            temp_data = new_data; %for debugging
-            new_data = obj.new_data_processor(temp_data,is_init_call);
-        end
+        % if ~isempty(obj.new_data_processor)
+        %     temp_data = new_data; %for debugging
+        %     new_data = obj.new_data_processor(temp_data,is_init_call);
+        % end
         
         %Plotting
         % %----------------------------------------------------------
