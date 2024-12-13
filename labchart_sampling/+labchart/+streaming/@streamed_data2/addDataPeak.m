@@ -304,9 +304,9 @@ function syncPeakNaive(new_data, delay, wave, sampling)
         if ~peak_detected
             now = tic;
             fprintf('PEAK detected: %.3f\n', now)%, 'HH:MM:SS.FFF'));
-            sound(wave, sampling);
             % Wait for 200ms
             pause(delay);
+            sound(wave, sampling);
             % Print "Signal" and time elapsed after 200ms
             fprintf('Signal: %.3f\n', toc(now))
             peak_detected = true;
