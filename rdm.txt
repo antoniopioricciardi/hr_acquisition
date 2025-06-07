@@ -1,0 +1,7 @@
+
+
+
+
+If On Linux run:
+
+PsychLinuxConfiguration
