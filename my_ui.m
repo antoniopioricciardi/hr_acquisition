@@ -21,6 +21,8 @@ try
     [string,terminatorChar] = GetEchoString(w,text,x,y,textColor);
     string;
 
+    
+
 
     for mysize=20:5:80
         % Setup text size:
