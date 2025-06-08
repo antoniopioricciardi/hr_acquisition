@@ -1,4 +1,4 @@
-function setupExperiment()
+function setupExperiment_fixed()
 % A Psychtoolbox script to set up a subject data folder.
 %
 % 1. Asks for a numeric subject ID.
@@ -58,7 +58,8 @@ try
         
         % 2. Ask the user for the subject ID
         % The 'Ask' function provides a simple GUI dialog box.
-        subjectID = Ask(window, 'Please enter the subject ID (number): ', white, black, 'GetChar', [], 30);
+        % --- THIS IS THE CORRECTED LINE ---
+        subjectID = Ask(window, 'Please enter the subject ID (number): ', white, black);
         
         % Check if the user pressed Cancel or entered nothing
         if isempty(subjectID)
