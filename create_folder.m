@@ -60,6 +60,7 @@ try
         % The 'Ask' function provides a simple GUI dialog box.
         % --- THIS IS THE CORRECTED LINE ---
         subjectID = Ask(window, 'Please enter the subject ID (number): ', white, black);
+        subjectID
         
         % Check if the user pressed Cancel or entered nothing
         if isempty(subjectID)
