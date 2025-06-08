@@ -18,7 +18,7 @@ try
     
     textColor = [255,255,255]
     % [string,terminatorChar] = GetEchoString(window,text,x,y,[textColor],[bgColor],[useKbCheck=0],[deviceIndex],[untilTime=inf],[KbCheck args…]);
-    [string,terminatorChar] = GetEchoString(window,text,x,y,textColor);
+    [string,terminatorChar] = GetEchoString(w,text,x,y,textColor);
 
 
     for mysize=20:5:80
