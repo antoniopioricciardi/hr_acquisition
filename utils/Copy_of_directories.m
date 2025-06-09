@@ -47,49 +47,4 @@ else
         directories()
     end
 end
-
 return
-
-% Loop until we successfully create (or override) the ID folder, or exit
-while true
-    % Ask user for an ID (string)
-    ID = input('Enter an ID for the test folder: ', 's');
-    
-    % Build the full path for this ID
-    idDir = fullfile(rootDir, ID);
-    
-    if ~exist(idDir, 'dir')
-        % Doesn’t exist yet → create it and exit loop
-        mkdir(idDir);
-        fprintf('Created folder: %s\n', idDir);
-        break;
-    else
-        % Already exists → ask what to do
-        promptStr = sprintf(...
-            ['Folder "%s" already exists.\n' ...
-             '[Y]es – override it;\n'       ...
-             '[N]o – pick another ID;\n'    ...
-             '[E]xit – cancel script.\n'    ...
-             'Your choice [Y/N/E]: '], ID);
-        resp = input(promptStr, 's');
-        
-        if strcmpi(resp, 'Y')
-            % Remove and recreate
-            rmdir(idDir, 's');    % 's' flag deletes all contents recursively
-            mkdir(idDir);
-            fprintf('Overridden folder: %s\n', idDir);
-            break;
-            
-        elseif strcmpi(resp, 'E')
-            % Exit script immediately
-            fprintf('Exiting without creating or overriding any folder.\n');
-            return;
-            
-        else
-            % User chose not to override → try again
-            fprintf('OK, let''s pick another ID (or press E to exit).\n\n');
-        end
-    end
-end
-    end
-end
