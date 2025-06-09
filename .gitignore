@@ -2,4 +2,4 @@
 ./Psychtoolbox/*
 Psychtoolbox/
 Psychtoolbox/*
-*/Psychtoolbox/
+*\Psychtoolbox\
