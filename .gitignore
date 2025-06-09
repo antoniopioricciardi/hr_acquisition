@@ -1,2 +1,4 @@
-Psychtoolbox.*
-Psychtoolbox/
+.DS_Store
+
+
+Psychtoolbox/*
