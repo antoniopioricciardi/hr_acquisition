@@ -28,8 +28,5 @@ function [] = session(window)
 
 
     KbStrokeWait;   % wait for any key
-
-    sca;
-
 end
 
