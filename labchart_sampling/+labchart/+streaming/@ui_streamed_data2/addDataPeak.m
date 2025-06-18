@@ -295,6 +295,7 @@ function syncPeakNaive(new_data, delay, wave, sampling)
     % Print "PEAK" exactly 200ms after detecting a peak
     persistent peak_detected
 
+    % peak_detected is to avoid finding peaks in two consecutive buffers
     if isempty(peak_detected)
         peak_detected = false;
     end
