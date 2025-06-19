@@ -50,11 +50,11 @@ classdef callback_examples
             %   s1.callback = @store_new_data;  It ensures the user_data property
             %   contains a struct with a field named 'buffer' used to accumulate
             %   received segments. Empty segments are ignored.
-            seg = obj.new_data;
-            if isempty(seg)
+            obj.user_data = obj.new_data;
+            if isempty(obj.user_data)
                 return;
             end
-            mat2str(size(obj.new_data))
+            %mat2str(size(obj.new_data))
         end
 
     end
