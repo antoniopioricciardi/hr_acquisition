@@ -109,7 +109,7 @@ classdef ui_streamed_data2 < handle
         %will always keep at least 'n_seconds_keep_valid' worth of data
         data 
         
-        new_data %Most recently retrieved data. 
+        new_data = [] %Most recently retrieved data. 
         %TODO: Make holding onto this optional ...
         
         d0 = '-- properties --'

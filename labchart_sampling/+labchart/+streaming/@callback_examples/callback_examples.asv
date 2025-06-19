@@ -39,24 +39,7 @@ classdef callback_examples
                 end
             end
         end
-        function myStreamingCallback(obj, ~)
-            seg = obj.new_data;                          % grab latest samples
-            obj.user_data.buf = [obj.user_data.buf; seg];  % accumulate
-        end
-
-        function store_new_data(obj, ~)
-            %STORE_NEW_DATA Append latest streaming segment to obj.user_data.buffer.
-            %   This callback can be assigned to the ui_streamed_data2 object via
-            %   s1.callback = @store_new_data;  It ensures the user_data property
-            %   contains a struct with a field named 'buffer' used to accumulate
-            %   received segments. Empty segments are ignored.
-            seg = obj.new_data;
-            if isempty(seg)
-                return;
-            end
-            mat2str(size(obj.new_data))
-        end
-
+        function playPeak
     end
 end
 

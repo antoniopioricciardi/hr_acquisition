@@ -18,8 +18,8 @@ s1 = labchart.streaming.ui_streamed_data2(fs,n_seconds_valid,'Channel 3','h_axes
 
 s1.callback = @labchart.streaming.callback_examples.nValidSamples;
 s1.user_data.buf = [];           % initialize buffer
-%s1.callback = @labchart.streaming.callback_examples.myStreamingCallback;
-s1.callback = @labchart.streaming.callback_examples.store_new_data; % accumulate segments for offline use
+s1.callback = @labchart.streaming.callback_examples.myStreamingCallback;
+%s1.callback = @labchart.streaming.callback_examples.store_new_data; % accumulate segments for offline use
 %s1.callback = @labchart.streaming.callback_examples.myStreamingCallback;
 %Alternatively
 %s1.callback = @labchart.streaming.callback_examples.averageSamplesAddComment;
@@ -43,9 +43,10 @@ s1.register(d)
 f = parfeval(backgroundPool, @myLongLoop, 0);
 
 function myLongLoop
-    while true
-        if ~isempty(s1.new_data)
-            print(s1.new_data)
-        end
+    for i=0:10000
+        % heavy calculation here
+        %pause(0.1);     % simulate work
     end
+    
+    s1.callback = @labchart.streaming.callback_examples.myStreamingCallback;
 end
