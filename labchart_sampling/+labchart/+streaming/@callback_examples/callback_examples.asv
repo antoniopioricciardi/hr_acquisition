@@ -60,10 +60,21 @@ classdef callback_examples
         function pushToQueue(obj, dq)
             % Grab the latest chunk
             seg = obj.new_data;      % already a copy; inexpensive
+        
+            % Ignore empty callbacks (common at start-up)
+            if isempty(seg);  return;  end
+        
+            % Enqueue – asynchronous and non-blocking
+            send(dq, seg);
+        end
+
+        function pushToQueue(obj, dq)
+            % Grab the latest chunk
+            seg = obj.new_data;      % already a copy; inexpensive
 
             % Ignore empty callbacks (common at start-up)
             if ~isempty(seg)
-                obj.user_data = seg;
+                % obj.user_data = seg;
                 % Enqueue – asynchronous and non-blocking
                 send(dq, seg);
             end

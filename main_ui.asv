@@ -165,6 +165,12 @@ function cb = buildPeakCallback(delay_s, wave, fs, window)
         end
     end
 
+    function playAndPrint()
+        sound(wave,fs);
+        fprintf('Signal (%.0f ms later)\n', delay_s*1000);
+        peakPending = false;
+    end
+
     function playAndFlash()
         %if isplaying(player), stop(player); end
         %play(player);
