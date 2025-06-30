@@ -132,10 +132,18 @@ end % try..catch
 
 
 % ---------- buildPeakCallback.m ----------
-function cb = buildPeakCallback(delay_s, wave, fs, window)
+function cb = buildPeakCallback(delay_s, wave, fs, window, varargin)
 % buildPeakCallback  Create an afterEach-compatible peak detector.
 %
-%   cb = buildPeakCallback(0.20, wave, fs, windowHandle);
+
+    % -------- NEW optional args -------------------------------------------
+    p = inputParser;
+    addParameter(p,'MaxPeaks',   inf,          @(n) isnumeric(n)&&isscalar(n));
+    addParameter(p,'DoneFcn',    @(n)[],       @(f) isa(f,'function_handle'));
+    parse(p,varargin{:});
+    maxPeaks = p.Results.MaxPeaks;
+    doneFcn  = p.Results.DoneFcn;
+    % ------------------------------------------- end new block ------------
 
     narginchk(3,4);
     if nargin < 4, window = []; end            % window is optional
@@ -147,39 +155,38 @@ function cb = buildPeakCallback(delay_s, wave, fs, window)
         player.StopFcn = @(~,~) set(player,'CurrentSample',1);
     end
 
-    % -- state carried inside the closure ------------------------------
-    peakPending = false;
-    tDelay      = timer('ExecutionMode','singleShot', ...
-                        'StartDelay',delay_s, ...
-                        'TimerFcn',@(~,~) playAndFlash());
+    peakPending  = false;
+    peakCount    = 0;          % -------- NEW --------
+    tDelay       = timer('ExecutionMode','singleShot',...
+                         'StartDelay',delay_s,...
+                         'TimerFcn',@(~,~) playAndFlash());
 
-    cb = @callback;   % <- this handle is returned to the caller
-    % ==========================================================
+    cb = @callback;            % handle returned to caller
+    % ===================== nested functions ============================
     function callback(new_data)
         if any(new_data > 800) && ~peakPending
             peakPending = true;
-            fprintf('PEAK detected @ %.3f s\n',now*86400);
-            start(tDelay);
+            peakCount   = peakCount + 1;           % -------- NEW --------
+            fprintf('Peak %d @ %.3f s\n',peakCount,now*86400);
+
+            if peakCount >= maxPeaks               % -------- NEW --------
+                doneFcn(peakCount);                % notify the session
+            else
+                start(tDelay);                     % arm the delay timer
+            end
         elseif all(new_data <= 800)
             peakPending = false;
         end
     end
 
     function playAndFlash()
-        %if isplaying(player), stop(player); end
-        %play(player);
+        if isplaying(player), stop(player); end
+        play(player);
 
-        sound(wave,fs);
-        fprintf('Signal (%.0f ms later)\n', delay_s*1000);
-        peakPending = false;
-
-        % --- optional PsychToolbox flash -----------------------------
         if ~isempty(window) && Screen('WindowKind',window)
-            DrawFormattedText(window, 'PEAK','center','center',[255 0 0]);
+            DrawFormattedText(window,'PEAK','center','center',[255 0 0]);
             Screen('Flip',window);
         end
-
-        fprintf('Signal (%.0f ms later)\n',delay_s*1000);
         peakPending = false;
     end
 end

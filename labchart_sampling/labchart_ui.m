@@ -39,10 +39,10 @@ delay_s   = 0.20;                          % 200 ms  ⇒ 0.20 s
 %[wave,fs] = audioread('ding.wav');         % whatever sound you want
 
 % Register callback – extra arguments are captured by the anonymous function
-%afterEach(dq, @(chunk) syncPeakNaive(chunk, delay_s,  heartbeat_y, heartbeat_Fs));
+afterEach(dq, @(chunk) syncPeakNaive(chunk, delay_s,  heartbeat_y, heartbeat_Fs));
 
-cb        = buildPeakCallback(0.20,heartbeat_y, heartbeat_Fs);
-afterEach(dq, cb);
+%cb        = buildPeakCallback(0.20,heartbeat_y, heartbeat_Fs);
+%afterEach(dq, cb);
 
 %dq = parallel.pool.DataQueue;                 % ① an async conduit
 %afterEach(dq, @gotSegment);                  % ② what to do with new data
