@@ -37,9 +37,12 @@ dq        = parallel.pool.DataQueue;       % your queue
 delay_s   = 0.20;                          % 200 ms  ⇒ 0.20 s
 %[wave,fs] = audioread('ding.wav');         % whatever sound you want
 
+peaks_number = 10;
 % Register callback – extra arguments are captured by the anonymous function
-afterEach(dq, @(chunk) syncPeakNaive(chunk, delay_s,  heartbeat_y, heartbeat_Fs));
-
+%afterEach(dq, @(chunk) syncPeakNaive(chunk, delay_s, heartbeat_y, heartbeat_Fs, peaks_number));
+% TO BE FIXED, MATLAB SAYS INEFFICIENT
+global listener
+listener = afterEach(dq, @(chunk) syncPeakNaiveWithListener(chunk, delay_s, heartbeat_y, heartbeat_Fs, 10));
 %cb        = buildPeakCallback(0.20,heartbeat_y, heartbeat_Fs);
 %afterEach(dq, cb);
 
@@ -57,15 +60,15 @@ h1 = subplot(2,1,1);
 fs = 1000; %frequency of sampling (sampling rate)
 fs2 = 20000;
 n_seconds_valid = 10;
-s1 = labchart.streaming.ui_streamed_data2(fs,n_seconds_valid,'Channel 3','h_axes',h1,'plot_options',{'Color','r'},'axis_width_seconds',5);
+s1 = labchart.streaming.ui_streamed_data2(fs,n_seconds_valid,'Channel 3',dq, 'h_axes',h1,'plot_options',{'Color','r'},'axis_width_seconds',5);
 
-s1.callback = @labchart.streaming.callback_examples.nValidSamples;
+%s1.callback = @labchart.streaming.callback_examples.nValidSamples;
 
 %s1.callback = @labchart.streaming.callback_examples.myStreamingCallback;
 %s1.callback = @labchart.streaming.callback_examples.store_new_data; % accumulate segments for offline use
 % s1.callback = @labchart.streaming.callback_examples.pushToQueue;
-s1.callback = @(obj,~) ...
-    labchart.streaming.callback_examples.pushToQueue(obj, dq);
+%s1.callback = @(obj,~) ...
+%    labchart.streaming.callback_examples.pushToQueue(obj, dq);
 %s1.callback = @(obj,~)labchart.streaming.callback_examples.pushToQueue(obj, dq);   % <- only one line!
 %s1.callback = @labchart.streaming.callback_examples.myStreamingCallback;
 %Alternatively
@@ -79,6 +82,114 @@ s1.callback = @(obj,~) ...
 
 %Use this if you only want one channel
 s1.register(d)
+
+
+
+% Then in your function:
+function syncPeakNaiveWithListener(new_data, delay, wave, sampling, max_peaks)
+    persistent peak_detected peak_count
+    global listener
+
+    if isempty(peak_detected), peak_detected = false; end
+    if isempty(peak_count), peak_count = 0; end
+
+    if max_peaks > 0 && peak_count >= max_peaks
+        fprintf('Reached max_peaks = %d. Deleting callback.\n', max_peaks);
+        delete(listener);
+        return
+    end
+
+    if any(new_data > 800)
+        if ~peak_detected
+            start_time = tic;
+            fprintf('PEAK %d detected: %.3f\n', peak_count + 1, start_time);
+            while toc(start_time) < delay
+            end
+            sound(wave, sampling);
+            fprintf('Signal: %.3f\n', toc(start_time));
+            peak_detected = true;
+            peak_count = peak_count + 1;
+        end
+    else
+        peak_detected = false;
+    end
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function syncPeakNaive(new_data, delay, wave, sampling, max_peaks)
+    % Print "PEAK" exactly `delay` seconds after detecting a peak
+    persistent peak_detected peak_count
+
+    % Initialize persistent variables
+    if isempty(peak_detected)
+        peak_detected = false;
+    end
+    if isempty(peak_count)
+        peak_count = 0;
+    end
+
+    % If max_peaks > 0 and we reached the limit, stop processing
+    if max_peaks > 0 && peak_count >= max_peaks
+        fprintf('Reached max_peaks = %d. Stopping further execution.\n', max_peaks);
+        return
+    end
+
+    % Detect peaks
+    if any(new_data > 800)
+        if ~peak_detected
+            start_time = tic;
+            fprintf('PEAK %d detected: %.3f\n', peak_count + 1, start_time);
+            while toc(start_time) < delay
+                % Busy wait
+            end
+            sound(wave, sampling);
+            fprintf('Signal: %.3f\n', toc(start_time))
+            peak_detected = true;
+            peak_count = peak_count + 1;
+        end
+    else
+        peak_detected = false;
+    end
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -103,7 +214,7 @@ function gotSegment(seg)
 end
 
 
-function syncPeakNaive(new_data, delay, wave, sampling)
+function syncPeakNaiveOLD(new_data, delay, wave, sampling)
     % Print "PEAK" exactly 200ms after detecting a peak
     persistent peak_detected
 

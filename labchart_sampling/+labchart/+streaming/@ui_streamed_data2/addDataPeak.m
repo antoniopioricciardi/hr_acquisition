@@ -153,7 +153,7 @@ try
         end
         
         obj.n_samples_added(obj.perf_I) = length(new_data);
-        
+        send(obj.queue, new_data);
         %Processing before plotting
         %----------------------------------------------------------
         %   Example: labchart.streaming.processors.butterworth_filter

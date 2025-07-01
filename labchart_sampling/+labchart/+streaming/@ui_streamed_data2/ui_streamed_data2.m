@@ -122,7 +122,7 @@ classdef ui_streamed_data2 < handle
         %at all times
         chan_index_or_name %Which channel to work with. This can be either
         %a 1 based index or the name of the channel (case-insensitive)
-        
+        queue % To push data
         
         d2 = '-- optional parameters --'
         %See documentation in the constructor for these ...
@@ -185,7 +185,7 @@ classdef ui_streamed_data2 < handle
     end
     
     methods
-        function obj = ui_streamed_data2(fs,n_seconds_keep_valid,chan_index_or_name,varargin)
+        function obj = ui_streamed_data2(fs,n_seconds_keep_valid,chan_index_or_name,queue,varargin)
             %
             %   obj = labchart.streaming.streamed_data1(fs, ...
             %           n_seconds_keep_valid,chan_index_or_name,varargin)
@@ -298,7 +298,7 @@ classdef ui_streamed_data2 < handle
             obj.fs = fs;
             obj.n_seconds_keep_valid = n_seconds_keep_valid;
             obj.chan_index_or_name = chan_index_or_name;
-            
+            obj.queue = queue;
             %Optional Inputs
             %---------------
             obj.auto_detect_record_change = in.auto_detect_record_change;

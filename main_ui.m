@@ -1,3 +1,13 @@
+%% ─── GLOBAL STATE ──────────────────────────────────────────────
+global listener sessionActive peak_count peak_detected peak_delay_s,
+
+tests_per_delay = 2;
+
+% these get reset on each run of main_ui, so you never inherit old state
+sessionActive = false;
+peak_count    = 0;
+peak_detected = false;
+
 
 %Example
 %-------
@@ -33,36 +43,31 @@ heartbeat_y = thud .* envelope; % Modulate the sine wave with the envelope
 % Normalize the signal to avoid clipping
 heartbeat_y = heartbeat_y / max(abs(heartbeat_y));
 
-dq        = parallel.pool.DataQueue;       % your queue
-delay_s   = 0.20;                          % 200 ms  ⇒ 0.20 s
+dq = parallel.pool.DataQueue;       % your queue
+peak_delay_s = 0.0;                          % 200 ms  ⇒ 0.20 s
 %[wave,fs] = audioread('ding.wav');         % whatever sound you want
 
+max_peaks = 10;
+
+% now register the callback before any data ever arrives
+listener = afterEach(dq, @(chunk) syncPeakNaiveWithListener(...
+                          chunk, heartbeat_y, heartbeat_Fs));
 % Register callback – extra arguments are captured by the anonymous function
-%afterEach(dq, @(chunk) syncPeakNaive(chunk, delay_s,  heartbeat_y, heartbeat_Fs));
-
-cb = buildPeakCallback(0.20,heartbeat_y, heartbeat_Fs);
-afterEach(dq, cb);
-
-
+% TO BE FIXED, MATLAB SAYS INEFFICIENT
+%global listener
+%listener = afterEach(dq, @(chunk) syncPeakNaiveWithListener(chunk, delay_s, heartbeat_y, heartbeat_Fs, 10));
 %Setup plotting
 %------------------
 clf %We'll setup for 3 channels ...
 h1 = subplot(2,1,1);
-%h2 = subplot(2,1,2);
-%h3 = subplot(3,1,3);
 
 %Initialize Streams
 %------------------
 fs = 1000; %frequency of sampling (sampling rate)
 fs2 = 20000;
 n_seconds_valid = 10;
-s1 = labchart.streaming.ui_streamed_data2(fs,n_seconds_valid,'Channel 3','h_axes',h1,'plot_options',{'Color','r'},'axis_width_seconds',5);
+s1 = labchart.streaming.ui_streamed_data2(fs,n_seconds_valid,'Channel 3',dq, 'h_axes',h1,'plot_options',{'Color','r'},'axis_width_seconds',5);
 
-s1.callback = @(obj,~) ...
-    labchart.streaming.callback_examples.pushToQueue(obj, dq);
-%s1.callback = @labchart.streaming.callback_examples.nValidSamples;
-%Alternatively
-%s1.callback = @labchart.streaming.callback_examples.averageSamplesAddComment;
 
 %Store whatever you want here. You can use this in the callback by
 %accessing this property from the first input argument.
@@ -70,13 +75,12 @@ s1.user_data = 'hello!';
 
 %Use this if you only want one channel
 s1.register(d)
-
+%global listener
+%listener = afterEach(dq, @(chunk) syncPeakNaiveWithListener(chunk, delay_s, heartbeat_y, heartbeat_Fs, 10));
 
 %To stop the events
 %-------------------
 %d.stopEvents()
-
-
 
 
 % ONLY FOR DEVELOPMENT PURPOSES!
@@ -100,10 +104,19 @@ try
     %ui_directories(window);
     %sca;
     Screen('Flip', window);
-    %demo_session(window);
-    demo_session(window, dq, cb);
-
-
+    for i=0:2
+        if mod(i,2)==0
+            peak_delay_s = 0.2;
+            demo_session(window, '0.2');
+        else
+            peak_delay_s = 0.4;
+            demo_session(window, '0.4');
+        end
+    end
+    %demo_session(window, dq, delay_s,  heartbeat_y, heartbeat_Fs, max_peaks);
+    %clear peak_count;
+    %delete(listener);
+    %clear global listener;
 
     white_col = [255,255,255];
     Screen('Flip', window);
@@ -112,7 +125,19 @@ try
     Screen('Flip', window);
     KbStrokeWait;   % wait for any key
 
+    % ────────────────────────────────────────────────────────────
+    % Prepare randomized delays:
+    delays = [repmat(0.2,tests_per_delay,1); repmat(0.4,tests_per_delay,1)];   % 20 of each
+    delays = delays(randperm(numel(delays)));       % shuffle
+    
+    % Run 40 sessions with those delays in random order:
+    for i = 1:numel(delays)
+        peak_delay_s = delays(i);
+        session(window);
+    end
+    % ────────────────────────────────────────────────────────────
 
+    
     num_tests = 4;
 %     for i = 1:num_tests
 %         session(window);
@@ -131,63 +156,35 @@ end % try..catch
 
 
 
-% ---------- buildPeakCallback.m ----------
-function cb = buildPeakCallback(delay_s, wave, fs, window, varargin)
-% buildPeakCallback  Create an afterEach-compatible peak detector.
-%
+% Then in your function:
+function syncPeakNaiveWithListener3(new_data, delay, wave, sampling, max_peaks)
+    persistent peak_detected peak_count
+    global listener
 
-    % -------- NEW optional args -------------------------------------------
-    p = inputParser;
-    addParameter(p,'MaxPeaks',   inf,          @(n) isnumeric(n)&&isscalar(n));
-    addParameter(p,'DoneFcn',    @(n)[],       @(f) isa(f,'function_handle'));
-    parse(p,varargin{:});
-    maxPeaks = p.Results.MaxPeaks;
-    doneFcn  = p.Results.DoneFcn;
-    % ------------------------------------------- end new block ------------
+    if isempty(peak_detected), peak_detected = false; end
+    if isempty(peak_count), peak_count = 0; end
 
-    narginchk(3,4);
-    if nargin < 4, window = []; end            % window is optional
-
-    % -- keep one audioplayer alive for the whole session --------------
-    persistent player
-    if isempty(player) || ~isvalid(player)
-        player = audioplayer(wave,fs);
-        player.StopFcn = @(~,~) set(player,'CurrentSample',1);
+    if max_peaks > 0 && peak_count >= max_peaks
+        fprintf('Reached max_peaks = %d. Deleting callback.\n', max_peaks);
+        delete(listener);
+        clear peak_count
+        return
     end
 
-    peakPending  = false;
-    peakCount    = 0;          % -------- NEW --------
-    tDelay       = timer('ExecutionMode','singleShot',...
-                         'StartDelay',delay_s,...
-                         'TimerFcn',@(~,~) playAndFlash());
-
-    cb = @callback;            % handle returned to caller
-    % ===================== nested functions ============================
-    function callback(new_data)
-        if any(new_data > 800) && ~peakPending
-            peakPending = true;
-            peakCount   = peakCount + 1;           % -------- NEW --------
-            fprintf('Peak %d @ %.3f s\n',peakCount,now*86400);
-
-            if peakCount >= maxPeaks               % -------- NEW --------
-                doneFcn(peakCount);                % notify the session
-            else
-                start(tDelay);                     % arm the delay timer
+    if any(new_data > 800)
+        if ~peak_detected
+            start_time = tic;
+            fprintf('PEAK %d detected: %.3f\n', peak_count + 1, start_time);
+            while toc(start_time) < delay
             end
-        elseif all(new_data <= 800)
-            peakPending = false;
+            sound(wave, sampling);
+            fprintf('Signal: %.3f\n', toc(start_time));
+            peak_detected = true;
+            peak_count = peak_count + 1;
         end
-    end
-
-    function playAndFlash()
-        if isplaying(player), stop(player); end
-        play(player);
-
-        if ~isempty(window) && Screen('WindowKind',window)
-            DrawFormattedText(window,'PEAK','center','center',[255 0 0]);
-            Screen('Flip',window);
-        end
-        peakPending = false;
+    else
+        peak_detected = false;
     end
 end
+
 
