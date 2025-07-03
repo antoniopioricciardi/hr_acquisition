@@ -5,84 +5,109 @@ function [] = ui_directories(window)
         mkdir(rootDir);
         fprintf('Created folder: %s\n', rootDir);
     end
-    
-    
-    id_prompt = 'Insert subject ID (e.g. 0001)';
-    x = 100;
-    y = 100;
-    session_prompt = 'Insert session ID (e.g. s001)';
-    session_x = 100;
-    session_y = 600;
-    
-    suggestion_text = 'Press [E] to exit';
-    
-    %try
-        suggestion_x = 3000;
-        suggestion_y = 100;
-    
-        white_col = [255,255,255];
-        bgColor   = [  0   0   0];
 
-        % Setup text size
-        Screen('TextSize', window, 40);
-        Screen('DrawText', window, suggestion_text, suggestion_x, suggestion_y, white_col);
-        textColor = [255,255,255];
-        % [string,terminatorChar] = GetEchoString(window,text,x,y,[textColor],[bgColor],[useKbCheck=0],[deviceIndex],[untilTime=inf],[KbCheck args…]);
-        %[id_string,terminatorChar] = GetEchoString(window,id_prompt,x,y,textColor);
-    
-        [id_string, terminatorChar] = GetEchoString( ...
-            window, ...      % your window pointer
-            id_prompt, ...   % the prompt string
-            x, y, ...        % where to draw it
-            textColor, ...   % color of your text
-            bgColor, ...     % <-- background color (needed to erase)
-            [], [], [], ...  % you can leave the next 3 args empty
-            1 ...            % useKbCheck = 1
-        );
+    % Common settings
+    Screen('TextSize', window, 40);
+    white_col = [255 255 255];
+    bgColor   = [  0   0   0];
+    suggestion_text = 'Press [E] to exit';
+    suggestion_x = 3000; suggestion_y = 100;
+    DrawSuggestion(window);
+
+    %—— Subject‐ID loop ——————————————————————————————
+    while true
+        % draw prompt & echo input
+        [id_string, ~] = GetEchoString(window, ...
+            'Insert subject ID (e.g. 0001)', ...
+            100, 100, white_col, bgColor, [], [], [], 1);
 
         id_path = fullfile(rootDir, id_string);
         if ~exist(id_path, 'dir')
             mkdir(id_path);
             fprintf('Created folder: %s\n', id_path);
+            break
         else
-            id_exists_prompt = path_exists_prompt(id_string);
-            % id_exists_prompt = sprintf(...
-            % ['Folder "%s" already exists.\n' ...
-            %  '[Y]es – override it;\n'       ...
-            %  '[N]o – pick another ID;\n'    ...
-            %  '[E]xit – cancel script.\n'    ...
-            %  'Your choice [Y/N/E]: '], id_string);
-    
-            % Already exists → ask what to do
-            [proptstr,terminatorChar] = GetEchoString(window,id_exists_prompt,x,y+300,textColor);
+            choice = AskOverride(window, id_string, 100, 400, white_col, bgColor);
+            switch lower(choice)
+                case 'y'  % overwrite
+                    rmdir(id_path, 's');
+                    mkdir(id_path);
+                    fprintf('Overwrote folder: %s\n', id_path);
+                    break
+                case 'n'  % choose another
+                    continue
+                case 'e'  % exit entire script
+                    sca; return
+            end
         end
-    
-        [session_string,terminatorChar] = GetEchoString(window,session_prompt,session_x,session_y,textColor);
+    end
 
-        [id_string, terminatorChar] = GetEchoString( ...
-            window, ...      % your window pointer
-            id_prompt, ...   % the prompt string
-            x, y, ...        % where to draw it
-            textColor, ...   % color of your text
-            bgColor, ...     % <-- background color (needed to erase)
-            [], [], [], ...  % you can leave the next 3 args empty
-            1 ...            % useKbCheck = 1
-        );
+    %—— Session‐ID loop ——————————————————————————————
+    while true
+        [session_string, ~] = GetEchoString(window, ...
+            'Insert session ID (e.g. s001)', ...
+            100, 600, white_col, bgColor, [], [], [], 1);
+
         session_path = fullfile(id_path, session_string);
         if ~exist(session_path, 'dir')
             mkdir(session_path);
             fprintf('Created folder: %s\n', session_path);
+            break
         else
-            session_exists_prompt = path_exists_prompt(id_string);
-            [proptstr,terminatorChar] = GetEchoString(window,session_exists_prompt,session_x,session_y+300,textColor);
+            choice = AskOverride(window, session_string, 100, 900, white_col, bgColor);
+            switch lower(choice)
+                case 'y'
+                    rmdir(session_path, 's');
+                    mkdir(session_path);
+                    fprintf('Overwrote folder: %s\n', session_path);
+                    break
+                case 'n'
+                    continue
+                case 'e'
+                    sca; return
+            end
         end
-        %sca;
-    % catch
-    %     %this "catch" section executes in case of an error in the "try" section
-    %     %above.  Importantly, it closes the onscreen window if its open.
-    %     sca;
-    % 
-    %     psychrethrow(psychlasterror);
-    % end % try..catch
+    end
 
+    % Done – you can now proceed with window…
+end
+
+%% Helper: draw the “Press [E] to exit” suggestion
+function DrawSuggestion(win)
+    white = [255 255 255];
+    black = [0 0 0];
+    Screen('FillRect', win, black);
+    Screen('DrawText', win, 'Press [E] to exit', 3000, 100, white);
+    Screen('Flip', win);
+end
+
+%% Helper: prompt Y/N/E and return the single‐letter choice
+function choice = AskOverride(win, name, x, y, fg, bg)
+    %prompt = path_exists_prompt(name);
+    promptStr = strconcat(...
+        ['Folder "', pathName, '" already exists.\n'], ...
+        '[Y]es – override it;\n', ...
+        '[N]o – pick another ID;\n', ...
+        '[E]xit – cancel script.\n', ...
+        'Your choice [Y/N/E]: ' ...
+    );
+    % echo‐string with background so backspace erases
+    [str, ~] = GetEchoString(win, prompt, x, y, fg, bg, [], [], [], 1);
+    if isempty(str)
+        choice = 'e';
+    else
+        choice = str(1);  % take first character
+    end
+end
+
+function [prompt] = path_exists_prompt(path_name)
+%FOLDER_EXIST Summary of this function goes here
+%   Detailed explanation goes here
+
+    prompt = sprintf(...
+    ['Folder "%s" already exists.\n' ...
+     '[Y]es – override it;\n'       ...
+     '[N]o – pick another ID;\n'    ...
+     '[E]xit – cancel script.\n'    ...
+     'Your choice [Y/N/E]: '], path_name);
 end

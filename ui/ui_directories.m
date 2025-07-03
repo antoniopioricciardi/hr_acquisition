@@ -1,4 +1,4 @@
-function [] = ui_directories(window)
+function session_path = ui_directories(window)
 
     rootDir = 'tests';
     if ~exist(rootDir, 'dir')
