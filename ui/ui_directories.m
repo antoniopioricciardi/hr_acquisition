@@ -92,3 +92,30 @@ function choice = AskOverride(win, name, x, y, fg, bg)
         choice = str(1);  % take first character
     end
 end
+
+
+function choice = AskOverride(win, pathName, x, y, fg, bg)
+    % build your multi‐line string
+    p = sprintf([ ...
+       'Folder "%s" already exists.\n' ...
+       '[Y]es – override it;\n'       ...
+       '[N]o – pick another ID;\n'    ...
+       '[E]xit – cancel script.\n'    ...
+       'Your choice [Y/N/E]: '], ...
+       pathName);
+
+    % clear background
+    Screen('FillRect', win, bg);
+    % draw wrapped prompt
+    DrawFormattedText(win, p, x, y, fg);
+    Screen('Flip', win);
+
+    % now capture just the single‐line answer
+    [answ, ~] = GetEchoString( ...
+        win, ...           % window
+        '', ...            % empty prompt
+        x, ...             % same X
+        y + 150, ...       % adjust Y to below the drawn text
+        fg, bg, [], [], [], 1);
+    choice = lower(answ(1));  % y, n, or e
+end
