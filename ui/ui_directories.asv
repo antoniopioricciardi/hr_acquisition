@@ -57,12 +57,12 @@ function [] = ui_directories(window)
             [proptstr,terminatorChar] = GetEchoString(window,id_exists_prompt,x,y+300,textColor);
         end
     
-        %[session_string,terminatorChar] = GetEchoString(window,session_prompt,session_x,session_y,textColor);
+        [session_string,terminatorChar] = GetEchoString(window,session_prompt,session_x,session_y,textColor);
 
-        [session_string, terminatorChar] = GetEchoString( ...
+        [id_string, terminatorChar] = GetEchoString( ...
             window, ...      % your window pointer
-            session_prompt, ...   % the prompt string
-            session_x, session_y, ...        % where to draw it
+            id_prompt, ...   % the prompt string
+            x, y, ...        % where to draw it
             textColor, ...   % color of your text
             bgColor, ...     % <-- background color (needed to erase)
             [], [], [], ...  % you can leave the next 3 args empty
