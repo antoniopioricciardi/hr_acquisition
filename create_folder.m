@@ -29,124 +29,134 @@ screenNumber = max(screens);
 white = WhiteIndex(screenNumber);
 black = BlackIndex(screenNumber);
 
-try
-    %----------------------------------------------------------------------
-    %                       Open a window
-    %----------------------------------------------------------------------
-    [window, windowRect] = PsychImaging('OpenWindow', screenNumber, black);
-    [screenXpixels, screenYpixels] = Screen('WindowSize', window);
+    try
+        %----------------------------------------------------------------------
+        %                       Open a window
+        %----------------------------------------------------------------------
+        [window, windowRect] = PsychImaging('OpenWindow', screenNumber, black);
+        [screenXpixels, screenYpixels] = Screen('WindowSize', window);
+        
+        % Set up text properties
+        Screen('TextFont', window, 'Ariel');
+        Screen('TextSize', window, 36);
     
-    % Set up text properties
-    Screen('TextFont', window, 'Ariel');
-    Screen('TextSize', window, 36);
-
-    %----------------------------------------------------------------------
-    %                Main Folder Creation Logic
-    %----------------------------------------------------------------------
-
-    % 1. Define and create the base 'tests' directory if it doesn't exist
-    baseDir = 'tests';
-    if ~exist(baseDir, 'dir')
-        fprintf('Base directory "%s" not found. Creating it now.\n', baseDir);
-        mkdir(baseDir);
-    end
-
-    folderCreatedSuccessfully = false;
-    folderCreationLoopActive = true;
-
-    while folderCreationLoopActive
-        
-        % 2. Ask the user for the subject ID
-        % The 'Ask' function provides a simple GUI dialog box.
-        % --- THIS IS THE CORRECTED LINE ---
-        subjectID = Ask(window, 'Please enter the subject ID (number): ', white, black);
-        subjectID
-        
-        % Check if the user pressed Cancel or entered nothing
-        if isempty(subjectID)
-            disp('Operation cancelled by user.');
-            finalMessage = 'Setup cancelled.';
-            folderCreationLoopActive = false; % Exit the main loop
-            continue; % Skip to the next iteration (which will terminate)
+        %----------------------------------------------------------------------
+        %                Main Folder Creation Logic
+        %----------------------------------------------------------------------
+    
+        % 1. Define and create the base 'tests' directory if it doesn't exist
+        baseDir = 'tests';
+        if ~exist(baseDir, 'dir')
+            fprintf('Base directory "%s" not found. Creating it now.\n', baseDir);
+            mkdir(baseDir);
         end
-        
-        % Construct the full path for the subject's folder
-        subjectFolder = fullfile(baseDir, subjectID);
-        
-        % 3. Check if a folder with this ID already exists
-        if exist(subjectFolder, 'dir')
-            % --- Folder Exists: Ask user to Overwrite or Change Name ---
+    
+        folderCreatedSuccessfully = false;
+        folderCreationLoopActive = true;
+    
+        while folderCreationLoopActive
             
-            % Prepare the message for the user
-            message = sprintf(['Folder "%s" already exists.\n\n'...
-                '[O]verwrite the folder\n\n'...
-                '[C]hange the ID'], subjectID);
-            
-            % Draw the message on the screen
-            DrawFormattedText(window, message, 'center', 'center', white);
-            Screen('Flip', window);
-            
-            % Wait for a valid key press ('o' or 'c')
-            while true
-                [~, ~, keyCode] = KbCheck;
-                keyName = KbName(keyCode);
-                
-                % We use iscell() because KbName can return a single string
-                % or a cell array of strings if multiple keys are pressed.
-                if iscell(keyName)
-                    keyName = keyName{1}; % just take the first key
-                end
+            % 2. Ask the user for the subject ID
+            % The 'Ask' function provides a simple GUI dialog box.
+            % --- THIS IS THE CORRECTED LINE ---
+            subjectID = Ask(window, 'Please enter the subject ID (number): ', white, black, 'GetChar');
+            %reply=Ask(window,'Who are you?',[],[],’GetChar’,RectLeft,RectTop)); % Accept keyboard input, echo it to screen.
+            % Centered prompt; characters appear as you type, Backspace works.
+            %subjectID = GetEchoString( ...
+            %    window, ...                 % PTB window pointer
+            %    'Please enter the subject ID: ', ...
+            %    'center', 'center', ...     % draw position
+            %    white, ...                  % text color
+            %    black ...                   % background color
+            %);
 
-                if strcmpi(keyName, 'o') % OVERWRITE
-                    fprintf('User chose to OVERWRITE folder: %s\n', subjectFolder);
-                    % Remove the old directory and its contents ('s' flag)
-                    rmdir(subjectFolder, 's');
-                    % Create the new, empty directory
-                    mkdir(subjectFolder);
-                    
-                    finalMessage = sprintf('Folder "%s" created successfully.', subjectID);
-                    folderCreatedSuccessfully = true;
-                    folderCreationLoopActive = false; % Exit the main loop
-                    break; % Exit the key-check loop
-                    
-                elseif strcmpi(keyName, 'c') % CHANGE NAME
-                    fprintf('User chose to CHANGE the ID.\n');
-                    % Do nothing, just break this inner loop. The outer loop will
-                    % then restart, asking for a new ID.
-                    break; % Exit the key-check loop
-                end
-                
-                % Wait a moment to prevent hogging the CPU
-                WaitSecs(0.01);
+            subjectID
+            
+            % Check if the user pressed Cancel or entered nothing
+            if isempty(subjectID)
+                disp('Operation cancelled by user.');
+                finalMessage = 'Setup cancelled.';
+                folderCreationLoopActive = false; % Exit the main loop
+                continue; % Skip to the next iteration (which will terminate)
             end
             
-        else
-            % --- Folder does not exist: Create it ---
-            fprintf('Creating new folder: %s\n', subjectFolder);
-            mkdir(subjectFolder);
-            finalMessage = sprintf('Folder "%s" created successfully.', subjectID);
-            folderCreatedSuccessfully = true;
-            folderCreationLoopActive = false; % Exit the main loop
+            % Construct the full path for the subject's folder
+            subjectFolder = fullfile(baseDir, subjectID);
+            
+            % 3. Check if a folder with this ID already exists
+            if exist(subjectFolder, 'dir')
+                % --- Folder Exists: Ask user to Overwrite or Change Name ---
+                
+                % Prepare the message for the user
+                message = sprintf(['Folder "%s" already exists.\n\n'...
+                    '[O]verwrite the folder\n\n'...
+                    '[C]hange the ID'], subjectID);
+                
+                % Draw the message on the screen
+                DrawFormattedText(window, message, 'center', 'center', white);
+                Screen('Flip', window);
+                
+                % Wait for a valid key press ('o' or 'c')
+                while true
+                    [~, ~, keyCode] = KbCheck;
+                    keyName = KbName(keyCode);
+                    
+                    % We use iscell() because KbName can return a single string
+                    % or a cell array of strings if multiple keys are pressed.
+                    if iscell(keyName)
+                        keyName = keyName{1}; % just take the first key
+                    end
+    
+                    if strcmpi(keyName, 'o') % OVERWRITE
+                        fprintf('User chose to OVERWRITE folder: %s\n', subjectFolder);
+                        % Remove the old directory and its contents ('s' flag)
+                        rmdir(subjectFolder, 's');
+                        % Create the new, empty directory
+                        mkdir(subjectFolder);
+                        
+                        finalMessage = sprintf('Folder "%s" created successfully.', subjectID);
+                        folderCreatedSuccessfully = true;
+                        folderCreationLoopActive = false; % Exit the main loop
+                        break; % Exit the key-check loop
+                        
+                    elseif strcmpi(keyName, 'c') % CHANGE NAME
+                        fprintf('User chose to CHANGE the ID.\n');
+                        % Do nothing, just break this inner loop. The outer loop will
+                        % then restart, asking for a new ID.
+                        break; % Exit the key-check loop
+                    end
+                    
+                    % Wait a moment to prevent hogging the CPU
+                    WaitSecs(0.01);
+                end
+                
+            else
+                % --- Folder does not exist: Create it ---
+                fprintf('Creating new folder: %s\n', subjectFolder);
+                mkdir(subjectFolder);
+                finalMessage = sprintf('Folder "%s" created successfully.', subjectID);
+                folderCreatedSuccessfully = true;
+                folderCreationLoopActive = false; % Exit the main loop
+            end
         end
+    
+        %----------------------------------------------------------------------
+        %                   Show Final Confirmation
+        %----------------------------------------------------------------------
+        
+        DrawFormattedText(window, [finalMessage '\n\nPress any key to exit.'], 'center', 'center', white);
+        Screen('Flip', window);
+        
+        % Wait for a key press to exit the script
+        KbStrokeWait;
+        
+        % Clean up and close the screen
+        sca;
+        
+    catch
+        % This section executes if an error occurs in the 'try' block
+        fprintf('An error occurred.\n');
+        sca; % Always close the screen
+        psychrethrow(psychlasterror);
     end
-
-    %----------------------------------------------------------------------
-    %                   Show Final Confirmation
-    %----------------------------------------------------------------------
-    
-    DrawFormattedText(window, [finalMessage '\n\nPress any key to exit.'], 'center', 'center', white);
-    Screen('Flip', window);
-    
-    % Wait for a key press to exit the script
-    KbStrokeWait;
-    
-    % Clean up and close the screen
-    sca;
-    
-catch
-    % This section executes if an error occurs in the 'try' block
-    fprintf('An error occurred.\n');
-    sca; % Always close the screen
-    psychrethrow(psychlasterror);
-end
 end

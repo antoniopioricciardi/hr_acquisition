@@ -133,16 +133,23 @@ try
     % Run 40 sessions with those delays in random order:
     for i = 1:numel(delays)
         peak_delay_s = delays(i);
-        session(window);
+        if peak_delay_s == 0.2
+            session(window, 'a');
+        else
+            session(window, 's');
+        end
     end
     % ────────────────────────────────────────────────────────────
 
-    
-    num_tests = 4;
-%     for i = 1:num_tests
-%         session(window);
-%     end
-    session(window);
+    out = session(window, 'a');
+    if out == 1
+        disp('User chose asynchronous as expected.');
+    else
+        disp('User chose something else.');
+    end
+
+
+   
     sca;
     delete(timerfind);     % stops the one-shot timers cleanly
 

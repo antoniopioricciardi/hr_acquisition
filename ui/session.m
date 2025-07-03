@@ -1,4 +1,4 @@
-function [] = session(window, delay_msg)
+function result = session(window, sync_async)
     global sessionActive peak_count peak_detected listener
     % reset your counters each time
     peak_count    = 0;
@@ -14,14 +14,15 @@ function [] = session(window, delay_msg)
 
     % draw your instructions
     Screen('FillRect', window, [0 0 0]);
-    DrawFormattedText(window, 'READY FOR NEXT SESSION. PRESS ENTER TO START', 'center','center',[255 255 255]);
+    DrawFormattedText(window, 'READY FOR NEXT SESSION. PRESS ENTER TO START', ...
+                      'center','center',[255 255 255]);
     Screen('Flip', window);
     KbStrokeWait;
 
-    % draw your instructions
     Screen('FillRect', window, [0 0 0]);
     DrawFormattedText(window, 'Playing peaks…', 'center','center',[255 255 255]);
     Screen('Flip', window);
+
     % LET THE CALLBACK START WORKING
     sessionActive = true;
 
@@ -38,13 +39,42 @@ function [] = session(window, delay_msg)
 
     % SESSION OVER
     sessionActive = false;
-    %delete(listener);        % tidy up
-    %clear syncPeakNaiveWithListener;  % clear any lingering state
+
+
+    % --- NEW PART: ask async vs sync ---
+    Screen('FillRect', window, [0 0 0]);
+    instr = 'Type "a" for asynchronous,  "s" for synchronous';
+    DrawFormattedText(window, instr, 'center','center',[255 255 255]);
+    Screen('Flip', window);
+
+    % Wait for a or s
+    result = 0;  % default
+    valid = false;
+    while ~valid
+        [down, ~, kc] = KbCheck;
+        if down
+            if kc(KbName('a')) || kc(KbName('A'))
+                key = 'a';
+                valid = true;
+            elseif kc(KbName('s')) || kc(KbName('S'))
+                key = 's';
+                valid = true;
+            end
+        end
+        pause(0.01);
+    end
+    
+    % compare to sync_async argument
+    if strcmpi(key, sync_async)
+        result = 1;
+    end
+
 
     % show “done” screen
-    DrawFormattedText(window, 'Done—press any key to exit', ...
-                      'center','center',[255 255 255]);
-    Screen('Flip', window);
-    KbStrokeWait;
+    %Screen('FillRect', window, [0 0 0]);
+    %DrawFormattedText(window, 'Done—press any key to continue', ...
+    %                  'center','center',[255 255 255]);
+    %Screen('Flip', window);
+    %KbStrokeWait;
 end
 
