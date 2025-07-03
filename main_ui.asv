@@ -1,10 +1,36 @@
 %% ─── GLOBAL STATE ──────────────────────────────────────────────
 global listener sessionActive peak_count peak_detected peak_delay_s,
- 
+
+tests_per_delay = 2;
+
 % these get reset on each run of main_ui, so you never inherit old state
 sessionActive = false;
 peak_count    = 0;
 peak_detected = false;
+
+
+
+% Tell PTB to give us low-latency mode
+InitializePsychSound(1);  
+
+% Parameters
+nrChannels = 1;                % mono
+repetitions = 1;               % play once each trigger
+startupLatencyClass = 1+8;     % 1: low‐latency, +8: allow mix
+
+% Open the default audio device [] at Fs, mono:
+pahandle = PsychPortAudio('Open', [], ...
+                         startupLatencyClass, ...
+                         1, Fs, nrChannels);
+                     
+% Fill its buffer with your heartbeat waveform:
+%    we’ll store it as a global so the listener callback can see it
+global audioHandle
+audioHandle = pahandle;
+PsychPortAudio('FillBuffer', pahandle, heartbeat_y');
+
+
+
 
 
 %Example
@@ -48,8 +74,11 @@ peak_delay_s = 0.0;                          % 200 ms  ⇒ 0.20 s
 max_peaks = 10;
 
 % now register the callback before any data ever arrives
-listener = afterEach(dq, @(chunk) syncPeakNaiveWithListener(...
-                          chunk, heartbeat_y, heartbeat_Fs));
+%listener = afterEach(dq, @(chunk) syncPeakNaiveWithListener(...
+%                          chunk, heartbeat_y, heartbeat_Fs));
+
+listener = afterEach(dq, @(chunk) syncPeakPTB(chunk, heartbeat_y, heartbeat_Fs));
+
 % Register callback – extra arguments are captured by the anonymous function
 % TO BE FIXED, MATLAB SAYS INEFFICIENT
 %global listener
@@ -102,7 +131,7 @@ try
     %ui_directories(window);
     %sca;
     Screen('Flip', window);
-    for i=0:4
+    for i=0:2
         if mod(i,2)==0
             peak_delay_s = 0.2;
             demo_session(window, '0.2');
@@ -125,7 +154,7 @@ try
 
     % ────────────────────────────────────────────────────────────
     % Prepare randomized delays:
-    delays = [repmat(0.2,20,1); repmat(0.4,20,1)];   % 20 of each
+    delays = [repmat(0.2,tests_per_delay,1); repmat(0.4,tests_per_delay,1)];   % 20 of each
     delays = delays(randperm(numel(delays)));       % shuffle
     
     % Run 40 sessions with those delays in random order:

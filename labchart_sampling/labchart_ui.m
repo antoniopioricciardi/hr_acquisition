@@ -34,7 +34,7 @@ heartbeat_y = heartbeat_y / max(abs(heartbeat_y));
 
 
 dq        = parallel.pool.DataQueue;       % your queue
-delay_s   = 0.20;                          % 200 ms  ⇒ 0.20 s
+delay_s   = 0.0;                          % 200 ms  ⇒ 0.20 s
 %[wave,fs] = audioread('ding.wav');         % whatever sound you want
 
 max_peaks = 10;

@@ -50,8 +50,10 @@ peak_delay_s = 0.0;                          % 200 ms  ⇒ 0.20 s
 max_peaks = 10;
 
 % now register the callback before any data ever arrives
-listener = afterEach(dq, @(chunk) syncPeakNaiveWithListener(...
-                          chunk, heartbeat_y, heartbeat_Fs));
+%listener = afterEach(dq, @(chunk) syncPeakNaiveWithListener(...
+%                          chunk, heartbeat_y, heartbeat_Fs));
+listener = afterEach(dq, @(chunk) syncPeakPTB(chunk, heartbeat_y, heartbeat_Fs));
+
 % Register callback – extra arguments are captured by the anonymous function
 % TO BE FIXED, MATLAB SAYS INEFFICIENT
 %global listener
@@ -85,8 +87,6 @@ s1.register(d)
 
 % ONLY FOR DEVELOPMENT PURPOSES!
 Screen('Preference', 'SkipSyncTests', 1);
-
-InitializePsychSound
 
 try
     % Choosing the display with the highest dislay number is

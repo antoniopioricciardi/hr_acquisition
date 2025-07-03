@@ -1,4 +1,4 @@
-function syncPeakNaiveWithListener(new_data, wave, sampling)
+function syncPeakPTB(new_data, wave, sampling)
     global listener sessionActive peak_detected peak_count peak_delay_s
 
     %–– only act while a session is running
@@ -25,7 +25,8 @@ function syncPeakNaiveWithListener(new_data, wave, sampling)
                     % Busy-waiting until the delay time is reached
                 end
                 % PLAY IMMEDIATELY
-                % sound(wave, sampling);
+                %sound(wave, sampling);
+
                 playS()
                 fprintf('Signal: %.3f\n', toc(start_time))
                 peak_detected = true;
@@ -38,7 +39,6 @@ function syncPeakNaiveWithListener(new_data, wave, sampling)
         end
     end
 end
-
 
 
 function playS()
