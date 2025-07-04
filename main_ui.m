@@ -143,6 +143,23 @@ try
         else
             disp('User chose the wrong answer.');
         end
+        % Determine test type and correctness
+        if peak_delay_s == 0.2
+            test_type = 'sync';
+        else
+            test_type = 'async';
+        end
+        
+        if result == 1
+            correctness = 'correct';
+        else
+            correctness = 'wrong';
+        end
+        
+        % Write result to CSV
+        fid = fopen(session_path, 'a');  % Append mode
+        fprintf(fid, '%d,%s,,%s,,,,,\n', i, test_type, correctness);
+        fclose(fid);
     end
     % ────────────────────────────────────────────────────────────
 
