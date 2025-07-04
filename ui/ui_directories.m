@@ -14,33 +14,42 @@ function session_path = ui_directories(window)
     suggestion_x = 3000; suggestion_y = 100;
     DrawSuggestion(window);
 
+    loop_done = false;
     %—— Subject‐ID loop ——————————————————————————————
-    while true
+    while ~loop_done
         % draw prompt & echo input
         [id_string, ~] = GetEchoString(window, ...
             'Insert subject ID (e.g. 0001)', ...
             100, 100, white_col, bgColor, [], [], [], 1);
 
         id_path = fullfile(rootDir, id_string);
+        loop_done = true;
+
+       if id_path == 'e'  % exit entire script
+            sca; return
+       end
+        % if folder does not exist, create it
         if ~exist(id_path, 'dir')
             mkdir(id_path);
             fprintf('Created folder: %s\n', id_path);
             break
-        else
-            choice = AskOverride(window, id_string, 100, 400, white_col, bgColor);
-            switch lower(choice)
-                case 'y'  % overwrite
-                    rmdir(id_path, 's');
-                    mkdir(id_path);
-                    fprintf('Overwrote folder: %s\n', id_path);
-                    break
-                case 'n'  % choose another
-                    continue
-                case 'e'  % exit entire script
-                    sca; return
-            end
+        %else
+        %    choice = AskOverride(window, id_string, 100, 400, white_col, bgColor);
+        %    switch lower(choice)
+        %        case 'y'  % overwrite
+        %            rmdir(id_path, 's');
+        %            mkdir(id_path);
+        %            fprintf('Overwrote folder: %s\n', id_path);
+        %            break
+        %        case 'n'  % choose another
+        %            continue
+        %       case 'e'  % exit entire script
+        %            sca; return
+        %    end
         end
     end
+
+    loop_done = false;
 
     %—— Session‐ID loop ——————————————————————————————
     while true

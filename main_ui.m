@@ -1,3 +1,5 @@
+clear all
+clc
 %% ─── GLOBAL STATE ──────────────────────────────────────────────
 global listener sessionActive peak_count peak_detected peak_delay_s,
 
@@ -101,10 +103,10 @@ try
     Screen('TextFont',window, 'Courier New');
     Screen('TextStyle', window, 1);
 
-    %session_path = ui_directories(window);
+    session_path = ui_directories(window);
     %sca;
     Screen('Flip', window);
-    for i=0:2
+    for i=0:1
         if mod(i,2)==0
             peak_delay_s = 0.2;
             demo_session(window, '0.2');
@@ -134,9 +136,9 @@ try
     for i = 1:numel(delays)
         peak_delay_s = delays(i);
         if peak_delay_s == 0.2
-            result = session(window, 'a');
-        else
             result = session(window, 's');
+        else
+            result = session(window, 'a');
         end
         if result == 1
             disp('User chose the correct answer.');
