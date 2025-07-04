@@ -48,18 +48,26 @@ function session_path = ui_directories(window)
             'Insert session ID (e.g. s001)', ...
             100, 600, white_col, bgColor, [], [], [], 1);
 
-        session_path = fullfile(id_path, session_string);
-        if ~exist(session_path, 'dir')
-            mkdir(session_path);
-            fprintf('Created folder: %s\n', session_path);
+        % Create file path with .csv extension
+        session_path = fullfile(id_path, [session_string '.csv']);
+        header = 'Trial_no,Tipo Test (Sync/Async),risposta(Sync/Async),giusto/sbagliato (correct/incorrect),tempo di risposta (ms),frequenza media,frequenza min,frequenza max,intervallo medio tra battiti';
+
+        if ~exist(session_path, 'file')
+            % Create CSV and write header
+            fid = fopen(session_path, 'w');
+            fprintf(fid, '%s\n', header);
+            fclose(fid);
+            fprintf('Created file with header: %s\n', session_path);
             break
         else
             choice = AskOverride(window, session_string, 100, 900, white_col, bgColor);
             switch lower(choice)
                 case 'y'
-                    rmdir(session_path, 's');
-                    mkdir(session_path);
-                    fprintf('Overwrote folder: %s\n', session_path);
+                    delete(session_path); % delete existing CSV
+                    fid = fopen(session_path, 'w');
+                    fprintf(fid, '%s\n', header);
+                    fclose(fid);
+                    fprintf('Overwrote file with header: %s\n', session_path);
                     break
                 case 'n'
                     continue

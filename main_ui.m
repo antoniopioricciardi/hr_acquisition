@@ -101,7 +101,7 @@ try
     Screen('TextFont',window, 'Courier New');
     Screen('TextStyle', window, 1);
 
-    %ui_directories(window);
+    %session_path = ui_directories(window);
     %sca;
     Screen('Flip', window);
     for i=0:2
@@ -134,20 +134,24 @@ try
     for i = 1:numel(delays)
         peak_delay_s = delays(i);
         if peak_delay_s == 0.2
-            session(window, 'a');
+            result = session(window, 'a');
         else
-            session(window, 's');
+            result = session(window, 's');
+        end
+        if result == 1
+            disp('User chose the correct answer.');
+        else
+            disp('User chose the wrong answer.');
         end
     end
     % ────────────────────────────────────────────────────────────
 
-    out = session(window, 'a');
+    %out = session(window, 'a');
     if out == 1
         disp('User chose asynchronous as expected.');
     else
         disp('User chose something else.');
     end
-
 
    
     sca;

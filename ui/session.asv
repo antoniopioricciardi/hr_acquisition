@@ -1,10 +1,7 @@
 function result = session(window, sync_async)
 % perform a single session, with a specific delay
 % window: the window on which to render on (PsychToolbox)
-% sync_async: specify the delay for the test
-% returns 1 if the answer is correct ('s' when the delay is low, 's' when
-% it is higher)
-
+% sync_async: whether the 
     global sessionActive peak_count peak_detected listener
     % reset your counters each time
     peak_count    = 0;

@@ -9,30 +9,6 @@ peak_count    = 0;
 peak_detected = false;
 
 
-
-% Tell PTB to give us low-latency mode
-InitializePsychSound(1);  
-
-% Parameters
-nrChannels = 1;                % mono
-repetitions = 1;               % play once each trigger
-startupLatencyClass = 1+8;     % 1: low‐latency, +8: allow mix
-
-% Open the default audio device [] at Fs, mono:
-pahandle = PsychPortAudio('Open', [], ...
-                         startupLatencyClass, ...
-                         1, Fs, nrChannels);
-                     
-% Fill its buffer with your heartbeat waveform:
-%    we’ll store it as a global so the listener callback can see it
-global audioHandle
-audioHandle = pahandle;
-PsychPortAudio('FillBuffer', pahandle, heartbeat_y');
-
-
-
-
-
 %Example
 %-------
 d = labchart.getActiveDocument();
@@ -76,7 +52,6 @@ max_peaks = 10;
 % now register the callback before any data ever arrives
 %listener = afterEach(dq, @(chunk) syncPeakNaiveWithListener(...
 %                          chunk, heartbeat_y, heartbeat_Fs));
-
 listener = afterEach(dq, @(chunk) syncPeakPTB(chunk, heartbeat_y, heartbeat_Fs));
 
 % Register callback – extra arguments are captured by the anonymous function
@@ -112,8 +87,6 @@ s1.register(d)
 
 % ONLY FOR DEVELOPMENT PURPOSES!
 Screen('Preference', 'SkipSyncTests', 1);
-
-InitializePsychSound
 
 try
     % Choosing the display with the highest dislay number is
@@ -160,16 +133,28 @@ try
     % Run 40 sessions with those delays in random order:
     for i = 1:numel(delays)
         peak_delay_s = delays(i);
-        session(window);
+        if peak_delay_s == 0.2
+            result = session(window, 'a');
+        else
+            result = session(window, 's');
+        end
+        if result == 1
+            disp('User chose the correct .');
+        else
+            disp('User chose something else.');
+        end
     end
     % ────────────────────────────────────────────────────────────
 
-    
-    num_tests = 4;
-%     for i = 1:num_tests
-%         session(window);
-%     end
-    session(window);
+    %out = session(window, 'a');
+    if out == 1
+        disp('User chose asynchronous as expected.');
+    else
+        disp('User chose something else.');
+    end
+
+
+   
     sca;
     delete(timerfind);     % stops the one-shot timers cleanly
 
