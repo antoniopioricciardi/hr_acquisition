@@ -1,4 +1,4 @@
-function result = session(window, sync_async)
+function [result, answer, answer_elapsed_time, session_elapsed_time, session_start_time_abs, session_end_time_abs] = session(window, sync_async)
 % perform a single session, with a specific delay
 % window: the window on which to render on (PsychToolbox)
 % sync_async: specify the delay for the test
@@ -10,7 +10,7 @@ function result = session(window, sync_async)
     peak_count    = 0;
     peak_detected = false;
 
-    suggestion_text = 'Press [E] to exit';
+    suggestion_text = 'Premi [E] per uscire';
    
     suggestion_x = 3000;
     suggestion_y = 100;
@@ -20,7 +20,7 @@ function result = session(window, sync_async)
 
     % draw your instructions
     Screen('FillRect', window, [0 0 0]);
-    DrawFormattedText(window, 'READY FOR NEXT SESSION. PRESS ENTER TO START', ...
+    DrawFormattedText(window, 'PREPARATI PER LA PROSSIMA SESSIONE. PREMI UN TASTO PER COMINCIARE', ...
                       'center','center',[255 255 255]);
     Screen('Flip', window);
     KbStrokeWait;
@@ -32,7 +32,10 @@ function result = session(window, sync_async)
     % LET THE CALLBACK START WORKING
     sessionActive = true;
 
+    % record absolute start time
+    session_start_time_abs = datetime('now','Format','HH:mm:ss');
 
+    session_time_start = tic;
     % BLOCK here until 10 peaks OR user presses E
     while peak_count < 10
         pause(0.0001)
@@ -42,14 +45,16 @@ function result = session(window, sync_async)
             break
         end
     end
-
+    session_elapsed_time = toc(session_time_start);
+    
+    session_end_time_abs = datetime('now','Format','HH:mm:ss');
     % SESSION OVER
     sessionActive = false;
 
 
     % --- NEW PART: ask async vs sync ---
     Screen('FillRect', window, [0 0 0]);
-    instr = 'Type "a" for asynchronous,  "s" for synchronous';
+    instr = 'Premi "a" per asincrono,  "s" per sincrono';
     DrawFormattedText(window, instr, 'center','center',[255 255 255]);
     Screen('Flip', window);
 
@@ -60,18 +65,19 @@ function result = session(window, sync_async)
         [down, ~, kc] = KbCheck;
         if down
             if kc(KbName('a')) || kc(KbName('A'))
-                key = 'a';
+                answer = 'a';
                 valid = true;
             elseif kc(KbName('s')) || kc(KbName('S'))
-                key = 's';
+                answer = 's';
                 valid = true;
             end
         end
         pause(0.01);
     end
+    answer_elapsed_time = toc(session_time_start);
     
     % compare to sync_async argument
-    if strcmpi(key, sync_async)
+    if strcmpi(answer, sync_async)
         result = 1;
     end
 

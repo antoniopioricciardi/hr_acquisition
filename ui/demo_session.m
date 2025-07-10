@@ -6,13 +6,13 @@ function [] = demo_session(window, delay_msg)
 
     % draw your instructions
     Screen('FillRect', window, [0 0 0]);
-    DrawFormattedText(window, strcat('DEMO SESSION, DELAY: ', delay_msg, 'PRESS ENTER TO START'), 'center','center',[255 255 255]);
+    DrawFormattedText(window, strcat('SESSIONE DI PROVA, DELAY: ', delay_msg, 'PREMI UN TASTO PER COMINCIARE'), 'center','center',[255 255 255]);
     Screen('Flip', window);
     KbStrokeWait;
 
     % draw your instructions
     Screen('FillRect', window, [0 0 0]);
-    DrawFormattedText(window, 'Playing 10 peaks…', 'center','center',[255 255 255]);
+    DrawFormattedText(window, 'Riproduco 10 segnali…', 'center','center',[255 255 255]);
     Screen('Flip', window);
     % LET THE CALLBACK START WORKING
     sessionActive = true;
@@ -34,7 +34,7 @@ function [] = demo_session(window, delay_msg)
     %clear syncPeakNaiveWithListener;  % clear any lingering state
 
     % show “done” screen
-    DrawFormattedText(window, 'Done—press any key to exit', ...
+    DrawFormattedText(window, 'Fatto - premi un tasto per terminare', ...
                       'center','center',[255 255 255]);
     Screen('Flip', window);
     KbStrokeWait;

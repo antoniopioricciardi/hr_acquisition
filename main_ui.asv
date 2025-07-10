@@ -1,6 +1,9 @@
+clear all
+clc
 %% ─── GLOBAL STATE ──────────────────────────────────────────────
 global listener sessionActive peak_count peak_detected peak_delay_s,
 
+num_demo_sessions = 2;
 tests_per_delay = 2;
 
 % these get reset on each run of main_ui, so you never inherit old state
@@ -101,27 +104,76 @@ try
     Screen('TextFont',window, 'Courier New');
     Screen('TextStyle', window, 1);
 
-    %ui_directories(window);
+    session_path = ui_directories(window);
     %sca;
     Screen('Flip', window);
-    for i=0:2
-        if mod(i,2)==0
-            peak_delay_s = 0.2;
-            demo_session(window, '0.2');
-        else
-            peak_delay_s = 0.4;
-            demo_session(window, '0.4');
+
+    % ---- DEMO PHASE ---- %
+    demo_done=false;
+    while ~demo_done
+        for i=1:num_demo_sessions
+            % draw your instructions
+            Screen('FillRect', window, [0 0 0]);
+            DrawFormattedText(window, strcat('SESSIONE DI PROVA, DELAY: ', delay_msg, 'PREMI UN TASTO PER COMINCIARE'), 'center','center',[255 255 255]);
+            Screen('Flip', window);
+            KbStrokeWait;
+
+            if mod(i,2)==0
+                peak_delay_s = 0.2;
+                [result, answer, answer_elapsed_time, session_elapsed_time, session_start_time_abs, session_end_time_abs] = session(window, 's');
+                %session(window, '0.2');
+            else
+                peak_delay_s = 0.4;
+                [result, answer, answer_elapsed_time, session_elapsed_time, session_start_time_abs, session_end_time_abs] = session(window, 'a');
+                %session(window, '0.4');
+            end
+            if result == 1
+                Screen('FillRect', window, [0 0 0]);
+                DrawFormattedText(window, 'Risposta corretta. Premi un tasto per continuare', 'center','center',[255 255 255]);
+                Screen('Flip', window);
+                KbStrokeWait;
+                disp('Risposta corretta.');
+            else
+                Screen('FillRect', window, [0 0 0]);
+                DrawFormattedText(window, 'Risposta errata. Premi un tasto per continuare', 'center','center',[255 255 255]);
+                Screen('Flip', window);
+                KbStrokeWait;
+                disp('Risposta errata.');
+            end
         end
+        % draw your instructions
+        Screen('FillRect', window, [0 0 0]);
+        DrawFormattedText(window, 'Premi [R] per ripetere la demo, invio per andare avanti', 'center','center',[255 255 255]);
+        Screen('Flip', window);
+
+        % wait for a key press
+        KbStrokeWait;                          % blocks until any key is down
+        [~, ~, keyCode] = KbCheck;            % check which key
+        keyPressed = KbName(find(keyCode));   % get name of the first key down
+        
+        % if multiple keys are returned, take the first
+        if iscell(keyPressed)
+            keyPressed = keyPressed{1};
+        end
+        
+        % if it's NOT 'r', exit the loop
+        if ~strcmpi(keyPressed, 'r')
+            demo_done = true;
+        else
+            demo_done = false;
+        end
+        
     end
-    %demo_session(window, dq, delay_s,  heartbeat_y, heartbeat_Fs, max_peaks);
-    %clear peak_count;
-    %delete(listener);
-    %clear global listener;
+
+    % ---- DEMO PHASE DONE ---- %
+    
+    % ---- TEST PHASE ---- %
+    test_start_time = tic;
 
     white_col = [255,255,255];
     Screen('Flip', window);
-    DrawFormattedText(window, 'Press [E] to exit', 'right', [], white_col);
-    DrawFormattedText(window, 'We are now going to start the test', 'center', 'center', white_col);
+    DrawFormattedText(window, 'Premi [E] per uscire', 'right', [], white_col);
+    DrawFormattedText(window, 'Ora cominceremo il test', 'center', 'center', white_col);
     Screen('Flip', window);
     KbStrokeWait;   % wait for any key
 
@@ -134,15 +186,61 @@ try
     for i = 1:numel(delays)
         peak_delay_s = delays(i);
         if peak_delay_s == 0.2
-            result = session(window, 'a');
+            [result, answer, answer_elapsed_time, session_elapsed_time, session_start_time_abs, session_end_time_abs] = session(window, 's');
         else
-            result = session(window, 's');
+            [result, answer, answer_elapsed_time, session_elapsed_time, session_start_time_abs, session_end_time_abs] = session(window, 'a');
         end
         if result == 1
-            disp('User chose the correct .');
+            disp('Risposta corretta.');
         else
-            disp('User chose something else.');
+            disp('Risposta errata.');
         end
+        % Determine test type and correctness
+        if peak_delay_s == 0.2
+            test_type = 'sync';
+        else
+            test_type = 'async';
+        end
+        
+        if result == 1
+            correctness = 'correct';
+        else
+            correctness = 'wrong';
+        end
+        test_end_time = toc(test_start_time);
+        formatted_test_end_time = seconds(test_end_time);
+        formatted_test_end_time.Format = 'hh:mm:ss';
+        seconds(t,'Format','hh:mm:ss') )
+        % ---- TEST PHASE DONE ---- %
+        
+        % ---- SAVE RESULTS TO FILE---- %
+
+        % Write result to CSV
+        fid = fopen(session_path, 'a');  % Append mode
+        %fprintf(fid, '%d,%s,%s,%s,%s,%d,%d,%d,%d\n', i, test_type, result, answer, correctness, answer_elapsed_time, session_elapsed_time, session_start_time_abs, session_end_time_abs);
+        
+        % convert datetimes to strings
+        tstart_str = char(session_start_time_abs);   % e.g. '14:32:07'
+        tend_str   = char(session_end_time_abs);     % e.g. '14:32:12'
+        
+        % now fprintf with matching specifiers:
+        fprintf(fid, ...
+            '%d,%s,%s,%s,%s,%.3f,%.3f,%s,%s\n', ...
+            i, ...
+            test_type, ...
+            result, ...
+            answer, ...
+            correctness, ...
+            answer_elapsed_time, ...
+            session_elapsed_time, ...
+            tstart_str, ...
+            tend_str);
+        
+        
+        
+        fclose(fid);
+        Trial_no,Tipo Test (Sync/Async),risposta(Sync/Async),giusto/sbagliato (correct/incorrect),tempo di risposta (ms),tempo trascorso,ora inizio, ora fine, tempo totale trascorso';
+
     end
     % ────────────────────────────────────────────────────────────
 
@@ -152,7 +250,6 @@ try
     else
         disp('User chose something else.');
     end
-
 
    
     sca;

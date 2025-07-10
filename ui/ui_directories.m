@@ -59,8 +59,8 @@ function session_path = ui_directories(window)
 
         % Create file path with .csv extension
         session_path = fullfile(id_path, [session_string '.csv']);
-        header = 'Trial_no,Tipo Test (Sync/Async),risposta(Sync/Async),giusto/sbagliato (correct/incorrect),tempo di risposta (ms),frequenza media,frequenza min,frequenza max,intervallo medio tra battiti';
-
+        %header = 'Trial_no,Tipo Test (Sync/Async),risposta(Sync/Async),giusto/sbagliato (correct/incorrect),tempo di risposta (ms),frequenza media,frequenza min,frequenza max,intervallo medio tra battiti';
+        header = 'Trial_no,Tipo Test (Sync/Async),risposta(Sync/Async),giusto/sbagliato (correct/incorrect),tempo di risposta (s),tempo trascorso (s),ora inizio, ora fine, tempo totale trascorso';
         if ~exist(session_path, 'file')
             % Create CSV and write header
             fid = fopen(session_path, 'w');
