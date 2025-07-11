@@ -3,8 +3,11 @@ clc
 %% ─── GLOBAL STATE ──────────────────────────────────────────────
 global listener sessionActive peak_count peak_detected peak_delay_s,
 
-num_demo_sessions = 2;
-tests_per_delay = 2;
+% load config parameters
+cfg = config();
+num_demo_sessions = cfg.num_demo_sessions;
+tests_per_delay = cfg.tests_per_delay;
+max_peaks = cfg.max_peaks;
 
 % these get reset on each run of main_ui, so you never inherit old state
 sessionActive = false;
@@ -49,8 +52,6 @@ heartbeat_y = heartbeat_y / max(abs(heartbeat_y));
 dq = parallel.pool.DataQueue;       % your queue
 peak_delay_s = 0.0;                          % 200 ms  ⇒ 0.20 s
 %[wave,fs] = audioread('ding.wav');         % whatever sound you want
-
-max_peaks = 10;
 
 % now register the callback before any data ever arrives
 %listener = afterEach(dq, @(chunk) syncPeakNaiveWithListener(...
