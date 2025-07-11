@@ -6,8 +6,10 @@ global listener sessionActive peak_count peak_detected peak_delay_s,
 num_demo_sessions = 2;
 tests_per_delay = 2;
 
+sessionActive = true;
+pause(0.5);
+
 % these get reset on each run of main_ui, so you never inherit old state
-sessionActive = false;
 peak_count    = 0;
 peak_detected = false;
 
@@ -56,6 +58,7 @@ max_peaks = 10;
 %listener = afterEach(dq, @(chunk) syncPeakNaiveWithListener(...
 %                          chunk, heartbeat_y, heartbeat_Fs));
 listener = afterEach(dq, @(chunk) syncPeakPTB(chunk, heartbeat_y, heartbeat_Fs));
+sessionActive = false;
 
 % Register callback – extra arguments are captured by the anonymous function
 % TO BE FIXED, MATLAB SAYS INEFFICIENT
@@ -89,7 +92,8 @@ s1.register(d)
 
 
 % ONLY FOR DEVELOPMENT PURPOSES!
-Screen('Preference', 'SkipSyncTests', 1);
+Screen('Preference', 'SkipSyncTests', 1); %  THIS SHOULD BE 0 FOR REAL TESTS!
+
 
 try
     % Choosing the display with the highest dislay number is
@@ -109,61 +113,61 @@ try
     Screen('Flip', window);
 
     % ---- DEMO PHASE ---- %
-    demo_done=false;
-    while ~demo_done
-        for i=1:num_demo_sessions
-            % draw your instructions
-            Screen('FillRect', window, [0 0 0]);
-            DrawFormattedText(window, strcat('SESSIONE DI PROVA, DELAY: ', delay_msg, 'PREMI UN TASTO PER COMINCIARE'), 'center','center',[255 255 255]);
-            Screen('Flip', window);
-            KbStrokeWait;
-
-            if mod(i,2)==0
-                peak_delay_s = 0.2;
-                [result, answer, answer_elapsed_time, session_elapsed_time, session_start_time_abs, session_end_time_abs] = session(window, 's');
-                %session(window, '0.2');
-            else
-                peak_delay_s = 0.4;
-                [result, answer, answer_elapsed_time, session_elapsed_time, session_start_time_abs, session_end_time_abs] = session(window, 'a');
-                %session(window, '0.4');
-            end
-            if result == 1
-                Screen('FillRect', window, [0 0 0]);
-                DrawFormattedText(window, 'Risposta corretta. Premi un tasto per continuare', 'center','center',[255 255 255]);
-                Screen('Flip', window);
-                KbStrokeWait;
-                disp('Risposta corretta.');
-            else
-                Screen('FillRect', window, [0 0 0]);
-                DrawFormattedText(window, 'Risposta errata. Premi un tasto per continuare', 'center','center',[255 255 255]);
-                Screen('Flip', window);
-                KbStrokeWait;
-                disp('Risposta errata.');
-            end
-        end
-        % draw your instructions
-        Screen('FillRect', window, [0 0 0]);
-        DrawFormattedText(window, 'Premi [R] per ripetere la demo, invio per andare avanti', 'center','center',[255 255 255]);
-        Screen('Flip', window);
-
-        % wait for a key press
-        KbStrokeWait;                          % blocks until any key is down
-        [~, ~, keyCode] = KbCheck;            % check which key
-        keyPressed = KbName(find(keyCode));   % get name of the first key down
-        
-        % if multiple keys are returned, take the first
-        if iscell(keyPressed)
-            keyPressed = keyPressed{1};
-        end
-        
-        % if it's NOT 'r', exit the loop
-        if ~strcmpi(keyPressed, 'r')
-            demo_done = true;
-        else
-            demo_done = false;
-        end
-        
-    end
+%     demo_done=false;
+%     while ~demo_done
+%         for i=1:num_demo_sessions
+%             % draw your instructions
+%             Screen('FillRect', window, [0 0 0]);
+%             DrawFormattedText(window, 'SESSIONE DI PROVA, PREMI UN TASTO PER COMINCIARE', 'center','center',[255 255 255]);
+%             Screen('Flip', window);
+%             KbStrokeWait;
+% 
+%             if mod(i,2)==0
+%                 peak_delay_s = 0.2;
+%                 [result, answer, answer_elapsed_time, session_elapsed_time, session_start_time_abs, session_end_time_abs] = session(window, 's');
+%                 %session(window, '0.2');
+%             else
+%                 peak_delay_s = 0.4;
+%                 [result, answer, answer_elapsed_time, session_elapsed_time, session_start_time_abs, session_end_time_abs] = session(window, 'a');
+%                 %session(window, '0.4');
+%             end
+%             if result == 1
+%                 Screen('FillRect', window, [0 0 0]);
+%                 DrawFormattedText(window, 'Risposta corretta. Premi un tasto per continuare', 'center','center',[255 255 255]);
+%                 Screen('Flip', window);
+%                 KbStrokeWait;
+%                 disp('Risposta corretta.');
+%             else
+%                 Screen('FillRect', window, [0 0 0]);
+%                 DrawFormattedText(window, 'Risposta errata. Premi un tasto per continuare', 'center','center',[255 255 255]);
+%                 Screen('Flip', window);
+%                 KbStrokeWait;
+%                 disp('Risposta errata.');
+%             end
+%         end
+%         % draw your instructions
+%         Screen('FillRect', window, [0 0 0]);
+%         DrawFormattedText(window, 'Premi [R] per ripetere la demo, invio per andare avanti', 'center','center',[255 255 255]);
+%         Screen('Flip', window);
+% 
+%         % wait for a key press
+%         KbStrokeWait;                          % blocks until any key is down
+%         [~, ~, keyCode] = KbCheck;            % check which key
+%         keyPressed = KbName(find(keyCode));   % get name of the first key down
+%         
+%         % if multiple keys are returned, take the first
+%         if iscell(keyPressed)
+%             keyPressed = keyPressed{1};
+%         end
+%         
+%         % if it's NOT 'r', exit the loop
+%         if ~strcmpi(keyPressed, 'r')
+%             demo_done = true;
+%         else
+%             demo_done = false;
+%         end
+%         
+%     end
 
     % ---- DEMO PHASE DONE ---- %
     
@@ -208,7 +212,9 @@ try
             correctness = 'wrong';
         end
         test_end_time = toc(test_start_time);
-        formatted_test_end_time = seconds(test_end_time,'Format','hh:mm:ss');
+        %formatted_test_end_time = seconds(test_end_time,'Format','hh:mm:ss');
+        formatted_test_end_time    = seconds(test_end_time); % a duration object
+        formatted_test_end_time.Format = 'hh:mm:ss';
         % ---- TEST PHASE DONE ---- %
         
         % ---- SAVE RESULTS TO FILE---- %
@@ -241,11 +247,11 @@ try
     % ────────────────────────────────────────────────────────────
 
     %out = session(window, 'a');
-    if out == 1
-        disp('User chose asynchronous as expected.');
-    else
-        disp('User chose something else.');
-    end
+%     if out == 1
+%         disp('User chose asynchronous as expected.');
+%     else
+%         disp('User chose something else.');
+%     end
 
    
     sca;

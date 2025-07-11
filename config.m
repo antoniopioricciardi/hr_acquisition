@@ -4,7 +4,8 @@ function cfg = config()
     cfg.tests_per_delay   = 2;
 
     % peak parameters
-    cfg.peak_delay_s      = 0.2;
+    cfg.peak_delay_synch  = 0.2;
+    cfg.peak_delay_asynch = 0.4;
     cfg.max_peaks         = 10;
 
     % audio files

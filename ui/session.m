@@ -30,26 +30,27 @@ function [result, answer, answer_elapsed_time, session_elapsed_time, session_sta
     Screen('Flip', window);
 
     % LET THE CALLBACK START WORKING
-    sessionActive = true;
 
     % record absolute start time
     session_start_time_abs = datetime('now','Format','HH:mm:ss');
 
     session_time_start = tic;
     % BLOCK here until 10 peaks OR user presses E
+    sessionActive = true;
     while peak_count < 10
         pause(0.0001)
         %drawnow limitrate 
-        [down, ~, kc] = KbCheck;  
-        if down && kc(KbName('E'))
-            break
-        end
+%         [down, ~, kc] = KbCheck;  
+%         if down && kc(KbName('E'))
+%             break
+%         end
     end
+    sessionActive = false;
+
     session_elapsed_time = toc(session_time_start);
     
     session_end_time_abs = datetime('now','Format','HH:mm:ss');
     % SESSION OVER
-    sessionActive = false;
 
 
     % --- NEW PART: ask async vs sync ---
@@ -57,7 +58,7 @@ function [result, answer, answer_elapsed_time, session_elapsed_time, session_sta
     instr = 'Premi "a" per asincrono,  "s" per sincrono';
     DrawFormattedText(window, instr, 'center','center',[255 255 255]);
     Screen('Flip', window);
-
+    answer_start_time = tic;
     % Wait for a or s
     result = 0;  % default
     valid = false;
@@ -74,7 +75,7 @@ function [result, answer, answer_elapsed_time, session_elapsed_time, session_sta
         end
         pause(0.01);
     end
-    answer_elapsed_time = toc(session_time_start);
+    answer_elapsed_time = toc(answer_start_time);
     
     % compare to sync_async argument
     if strcmpi(answer, sync_async)
