@@ -108,8 +108,12 @@ try
     Screen('TextFont',window, 'Courier New');
     Screen('TextStyle', window, 1);
 
-    session_path = ui_directories(window);
+    [session_path, to_exit] = ui_directories(window);
     %sca;
+    if to_exit
+        sca;
+        return
+    end
     Screen('Flip', window);
 
     % ---- DEMO PHASE ---- %

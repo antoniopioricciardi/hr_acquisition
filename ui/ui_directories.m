@@ -1,5 +1,6 @@
-function session_path = ui_directories(window)
-
+function [session_path, to_exit] = ui_directories(window)
+    session_path = "";
+    to_exit = 0;
     rootDir = 'tests';
     if ~exist(rootDir, 'dir')
         mkdir(rootDir);
@@ -25,8 +26,10 @@ function session_path = ui_directories(window)
         id_path = fullfile(rootDir, id_string);
         loop_done = true;
 
-       if id_path == 'e'  % exit entire script
-            sca; return
+       if id_string == 'e'  % exit entire script
+            sca;
+            to_exit = 1;
+            return
        end
         % if folder does not exist, create it
         if ~exist(id_path, 'dir')
@@ -47,6 +50,13 @@ function session_path = ui_directories(window)
         %            sca; return
         %    end
         end
+
+%         [down, ~, kc] = KbCheck;
+%         if down
+%             if kc(KbName('e')) || kc(KbName('E'))
+%                 answer = 'a';
+%             end
+%         end
     end
 
     loop_done = false;
@@ -57,6 +67,11 @@ function session_path = ui_directories(window)
             'Insert session ID (e.g. s001)', ...
             100, 600, white_col, bgColor, [], [], [], 1);
 
+       if session_string == 'e'  % exit entire script
+            sca;
+            to_exit = 1;
+            return
+       end
         % Create file path with .csv extension
         session_path = fullfile(id_path, [session_string '.csv']);
         %header = 'Trial_no,Tipo Test (Sync/Async),risposta(Sync/Async),giusto/sbagliato (correct/incorrect),tempo di risposta (ms),frequenza media,frequenza min,frequenza max,intervallo medio tra battiti';
@@ -81,7 +96,7 @@ function session_path = ui_directories(window)
                 case 'n'
                     continue
                 case 'e'
-                    sca; return
+                    sca; to_exit=1;return
             end
         end
     end
