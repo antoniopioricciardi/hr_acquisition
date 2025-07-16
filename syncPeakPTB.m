@@ -1,18 +1,6 @@
 function syncPeakPTB(new_data, wave, sampling)
-    global listener sessionActive peak_detected peak_count peak_delay_s
-
-    %–– only act while a session is running
-    %if ~sessionActive
-        %return
-    %end
-
-    %–– once we hit max_peaks, tear down the listener and stop
-    %if peak_count >= max_peaks
-        %fprintf('Reached %d peaks – deleting callback.\n', max_peaks);
-        %delete(listener);
-    %    return
-    %end
-
+    global listener sessionActive peak_detected peak_count peak_delay_s player
+    
     if sessionActive
         %–– simple edge-detect on threshold
         if any(new_data > 800)
@@ -21,11 +9,14 @@ function syncPeakPTB(new_data, wave, sampling)
                 fprintf('PEAK detected: %.3f\n', start_time)%, 'HH:MM:SS.FFF'));
                 % Wait for delay ms (usually 200 or 500 ms)
                 % pause(delay);
-                while toc(start_time) < peak_delay_s
-                    % Busy-waiting until the delay time is reached
-                end
+%                 while toc(start_time) < peak_delay_s
+%                     % Busy-waiting until the delay time is reached
+%                 end
+                % 86400 is the seconds in a day
+                target_time = now + peak_delay_s/86400; % Convert to datenum
+
                 % PLAY IMMEDIATELY
-                sound(wave, sampling);
+                play(player, target_time);
 
                 %playS()
                 fprintf('Signal: %.3f\n', toc(start_time))
@@ -41,14 +32,41 @@ function syncPeakPTB(new_data, wave, sampling)
 end
 
 
+% function syncPeakPTB(new_data, wave, sampling)
+%     global listener sessionActive peak_detected peak_count peak_delay_s 
+%     
+%     if sessionActive
+%         %–– simple edge-detect on threshold
+%         if any(new_data > 800)
+%             if ~peak_detected
+%                 start_time = tic;
+%                 fprintf('PEAK detected: %.3f\n', start_time)%, 'HH:MM:SS.FFF'));
+%                 % Wait for delay ms (usually 200 or 500 ms)
+%                 % pause(delay);
+%                 while toc(start_time) < peak_delay_s
+%                     % Busy-waiting until the delay time is reached
+%                 end
+%                 % PLAY IMMEDIATELY
+%                 sound(wave, sampling);
+% 
+%                 %playS()
+%                 fprintf('Signal: %.3f\n', toc(start_time))
+%                 peak_detected = true;
+%                 peak_count    = peak_count + 1;
+%                 fprintf('Beat #%d\n', peak_count);
+%                 fprintf('Beat #%d\n', peak_delay_s);
+%             end
+%         else
+%             peak_detected = false;
+%         end
+%     end
+% end
+
+
 function playS()
+    global pahandle
     try
-        PsychDefaultSetup(2);
-        InitializePsychSound(1);
-    
         fs        = 48e3;
-        nChannels = 2;
-        pahandle  = PsychPortAudio('Open', [], 1, 1, fs, nChannels);
     
         % Build a 440-Hz stereo beep
         beep = MakeBeep(440, 0.3, fs);
@@ -64,7 +82,7 @@ function playS()
         % Give the ear a rest
         WaitSecs(0.2);
     
-        PsychPortAudio('Close', pahandle);
+        
     catch ME
         PsychPortAudio('Close');   % Clean up if something goes wrong
         rethrow(ME);

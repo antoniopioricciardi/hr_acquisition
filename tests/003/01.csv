@@ -1,5 +1,0 @@
-Trial_no,Tipo Test (Sync/Async),risposta(Sync/Async),giusto/sbagliato (correct/incorrect),tempo di risposta (s),tempo trascorso (s),ora inizio task, ora fine task, tempo totale trascorso
-1,sync,s,correct,4.060409e+00,6.868,49.000,6:43:46,16:43:52,00:00:16
-2,async,a,correct,1.046677e+00,10.483,49.000,6:43:59,16:44:09,00:00:30
-3,sync,s,correct,5.052020e-01,6.910,49.000,6:44:13,16:44:20,00:00:40
-4,async,a,correct,1.883264e+00,10.873,49.000,6:44:24,16:44:34,00:00:56

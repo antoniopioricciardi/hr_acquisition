@@ -1,5 +1,0 @@
-Trial_no,Tipo Test (Sync/Async),risposta(Sync/Async),giusto/sbagliato (correct/incorrect),tempo di risposta (ms),frequenza media,frequenza min,frequenza max,intervallo medio tra battiti
-1,async,,wrong,,,,,
-2,sync,,wrong,,,,,
-3,sync,,wrong,,,,,
-4,async,,correct,,,,,

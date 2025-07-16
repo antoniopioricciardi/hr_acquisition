@@ -1,7 +1,9 @@
 clear all
 clc
 %% ─── GLOBAL STATE ──────────────────────────────────────────────
-global listener sessionActive peak_count peak_detected peak_delay_s,
+global listener sessionActive peak_count peak_detected peak_delay_s pahandle,
+
+PsychDefaultSetup(2);
 
 % load config parameters
 cfg = config();
@@ -38,7 +40,7 @@ sound_Fs = Fs;
 
 %persistent heartbeat_y heartbeat_Fs;
 heartbeat_Fs = 44100; % Sampling frequency
-t = 0:1/heartbeat_Fs:0.5; % Time vector for 0.5 seconds
+t = 0:1/heartbeat_Fs:0.1; % Time vector for 0.5 seconds
 
 % Parameters for the thud
 f = 200;%60; % Low frequency for the thud (Hz)
@@ -58,6 +60,8 @@ peak_delay_s = 0.0;                          % 200 ms  ⇒ 0.20 s
 % now register the callback before any data ever arrives
 %listener = afterEach(dq, @(chunk) syncPeakNaiveWithListener(...
 %                          chunk, heartbeat_y, heartbeat_Fs));
+global player
+player = audioplayer(heartbeat_y, heartbeat_Fs); 
 listener = afterEach(dq, @(chunk) syncPeakPTB(chunk, heartbeat_y, heartbeat_Fs));
 sessionActive = false;
 
@@ -74,7 +78,7 @@ h1 = subplot(2,1,1);
 %------------------
 fs = 1000; %frequency of sampling (sampling rate)
 fs2 = 20000;
-n_seconds_valid = 10;
+n_seconds_valid = 2;
 s1 = labchart.streaming.ui_streamed_data2(fs,n_seconds_valid,'Channel 3',dq, 'h_axes',h1,'plot_options',{'Color','r'},'axis_width_seconds',5);
 
 
@@ -90,6 +94,10 @@ s1.register(d)
 %To stop the events
 %-------------------
 %d.stopEvents()
+
+%InitializePsychSound(1);
+%nChannels = 2;
+%pahandle  = PsychPortAudio('Open', [], 1, 1, fs, nChannels);
 
 
 % ONLY FOR DEVELOPMENT PURPOSES!
@@ -223,6 +231,8 @@ try
         % ---- TEST PHASE DONE ---- %
         
         % ---- SAVE RESULTS TO FILE---- %
+        answer_elapsed_time = round(answer_elapsed_time, 2);
+        session_elapsed_time = round(session_elapsed_time, 2);
 
         % Write result to CSV
         fid = fopen(session_path, 'a');  % Append mode
@@ -232,10 +242,10 @@ try
         tstart_str = char(session_start_time_abs);   % e.g. '14:32:07'
         tend_str = char(session_end_time_abs);     % e.g. '14:32:12'
         formatted_test_end_time_str = char(formatted_test_end_time);
-        
+        %tempo trascorso (s),ora inizio task, ora fine task, tempo totale trascorso'
         % now fprintf with matching specifiers:
         fprintf(fid, ...
-            '%d,%s,%s,%s,%s,%.3f,%.3f,%s,%s,%s\n', ...
+            '%d,%s,%s,%s,%.2f,%.2f,%s,%s,%s\n', ...
             i, ...
             test_type, ...
             answer, ...
@@ -261,13 +271,14 @@ try
    
     sca;
     delete(timerfind);     % stops the one-shot timers cleanly
-
+    PsychPortAudio('Close', pahandle);
 catch
     %this "catch" section executes in case of an error in the "try" section
     %above.  Importantly, it closes the onscreen window if its open.
     sca;
 
     psychrethrow(psychlasterror);
+    PsychPortAudio('Close', pahandle);
 end % try..catch
 
 
