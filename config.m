@@ -5,7 +5,7 @@ function cfg = config()
 
     % peak parameters
     cfg.peak_delay_synch  = 0.2;
-    cfg.peak_delay_asynch = 0.4;
+    cfg.peak_delay_asynch = 0.8;
     cfg.max_peaks         = 10;
 
     % audio files
@@ -17,4 +17,6 @@ function cfg = config()
 
     % psychtoolbox
     cfg.skipSyncTests     = true;
+
+    cfg.sound_pitch = 200;
 end

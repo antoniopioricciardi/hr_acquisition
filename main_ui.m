@@ -39,12 +39,14 @@ sound_Fs = Fs;
 
 
 %persistent heartbeat_y heartbeat_Fs;
+sound_length_t = 0.1; % length of the sound (in seconds)
 heartbeat_Fs = 44100; % Sampling frequency
-t = 0:1/heartbeat_Fs:0.1; % Time vector for 0.5 seconds
+t = 0:1/heartbeat_Fs:sound_length_t; % Time vector for sound_length_t seconds
 
 % Parameters for the thud
-f = 200;%60; % Low frequency for the thud (Hz)
-thud = sin(2 * pi * f * t); % Low-frequency sine wave
+sound_pitch = cfg.sound_pitch; % frequency for the thud (Hz)
+%f = 200;%60; % Low frequency for the thud (Hz)
+thud = sin(2 * pi * sound_pitch * t); % Low-frequency sine wave
 
 % Apply a Gaussian envelope for attack and decay
 envelope = exp(-10 * t); % Exponential decay
@@ -60,6 +62,8 @@ peak_delay_s = 0.0;                          % 200 ms  ⇒ 0.20 s
 % now register the callback before any data ever arrives
 %listener = afterEach(dq, @(chunk) syncPeakNaiveWithListener(...
 %                          chunk, heartbeat_y, heartbeat_Fs));
+% Initialize PsychPortAudio once
+initializePsychAudio(heartbeat_y, heartbeat_Fs);
 global player
 player = audioplayer(heartbeat_y, heartbeat_Fs); 
 listener = afterEach(dq, @(chunk) syncPeakPTB(chunk, heartbeat_y, heartbeat_Fs));
@@ -196,7 +200,7 @@ try
 
     % ────────────────────────────────────────────────────────────
     % Prepare randomized delays:
-    delays = [repmat(0.2,tests_per_delay,1); repmat(0.4,tests_per_delay,1)];   % 20 of each
+    delays = [repmat(cfg.peak_delay_synch,tests_per_delay,1); repmat(cfg.peak_delay_asynch,tests_per_delay,1)];   % 20 of each
     delays = delays(randperm(numel(delays)));       % shuffle
     
     % Run 40 sessions with those delays in random order:
@@ -271,14 +275,16 @@ try
    
     sca;
     delete(timerfind);     % stops the one-shot timers cleanly
-    PsychPortAudio('Close', pahandle);
+    cleanupPsychAudio()
+    %PsychPortAudio('Close', pahandle);
 catch
+    cleanupPsychAudio()
     %this "catch" section executes in case of an error in the "try" section
     %above.  Importantly, it closes the onscreen window if its open.
     sca;
 
     psychrethrow(psychlasterror);
-    PsychPortAudio('Close', pahandle);
+    %PsychPortAudio('Close', pahandle);
 end % try..catch
 
 
@@ -315,3 +321,43 @@ function syncPeakNaiveWithListener3(new_data, delay, wave, sampling, max_peaks)
 end
 
 
+% Initialization function (call once at startup)
+function initializePsychAudio(wave, sampling)
+    global pahandle
+    
+    % Initialize PsychPortAudio
+    InitializePsychSound(1); % 1 = push hard for low latency
+    
+    % Ensure wave is properly formatted
+    % PsychPortAudio expects: rows = channels, columns = samples
+    % Your heartbeat_y should already be a row vector (1 x N)
+    if size(wave, 1) > size(wave, 2)
+        wave = wave'; % Convert column vector to row vector if needed
+    end
+    
+    nchannels = size(wave, 1); % Should be 1 for mono
+    nsamples = size(wave, 2);  % Should be your actual sample count
+    
+    % Open audio device for mono playback
+    % Parameters: deviceid, mode, reqlatencyclass, freq, nchannels
+    pahandle = PsychPortAudio('Open', [], 1, 1, sampling, 1); % Force mono (1 channel)
+    
+    % Set volume (optional)
+    PsychPortAudio('Volume', pahandle, 1);
+    
+    fprintf('PsychPortAudio initialized:\n');
+    fprintf('  Sampling rate: %d Hz\n', sampling);
+    fprintf('  Channels: %d\n', nchannels);
+    fprintf('  Samples: %d\n', nsamples);
+    fprintf('  Duration: %.3f s\n', nsamples/sampling);
+end
+
+% Cleanup function (call when done)
+function cleanupPsychAudio()
+    global pahandle
+    
+    if ~isempty(pahandle)
+        PsychPortAudio('Close', pahandle);
+        pahandle = [];
+    end
+end

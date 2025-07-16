@@ -20,7 +20,7 @@ function [session_path, to_exit] = ui_directories(window)
     while ~loop_done
         % draw prompt & echo input
         [id_string, ~] = GetEchoString(window, ...
-            'Insert subject ID (e.g. 0001)', ...
+            'Inserisci ID soggetto (es. 0001)', ...
             100, 100, white_col, bgColor, [], [], [], 1);
 
         id_path = fullfile(rootDir, id_string);
@@ -34,7 +34,7 @@ function [session_path, to_exit] = ui_directories(window)
         % if folder does not exist, create it
         if ~exist(id_path, 'dir')
             mkdir(id_path);
-            fprintf('Created folder: %s\n', id_path);
+            fprintf('Cartella creata: %s\n', id_path);
             break
         %else
         %    choice = AskOverride(window, id_string, 100, 400, white_col, bgColor);
@@ -64,7 +64,7 @@ function [session_path, to_exit] = ui_directories(window)
     %—— Session‐ID loop ——————————————————————————————
     while true
         [session_string, ~] = GetEchoString(window, ...
-            'Insert session ID (e.g. s001)', ...
+            'Inserisci ID sessione (es. s001)', ...
             100, 600, white_col, bgColor, [], [], [], 1);
 
        if session_string == 'e'  % exit entire script
@@ -81,7 +81,7 @@ function [session_path, to_exit] = ui_directories(window)
             fid = fopen(session_path, 'w');
             fprintf(fid, '%s\n', header);
             fclose(fid);
-            fprintf('Created file with header: %s\n', session_path);
+            fprintf('File creato con nome: %s\n', session_path);
             break
         else
             choice = AskOverride(window, session_string, 100, 900, white_col, bgColor);
@@ -91,7 +91,7 @@ function [session_path, to_exit] = ui_directories(window)
                     fid = fopen(session_path, 'w');
                     fprintf(fid, '%s\n', header);
                     fclose(fid);
-                    fprintf('Overwrote file with header: %s\n', session_path);
+                    fprintf('File %s sovrascritto\n', session_path);
                     break
                 case 'n'
                     continue
@@ -109,7 +109,7 @@ function DrawSuggestion(win)
     white = [255 255 255];
     black = [0 0 0];
     Screen('FillRect', win, black);
-    Screen('DrawText', win, 'Press [E] to exit', 3000, 100, white);
+    Screen('DrawText', win, 'Premere [E] per uscire', 3000, 100, white);
     Screen('Flip', win);
 end
 
@@ -130,9 +130,9 @@ function [prompt] = path_exists_prompt(path_name)
 %   Detailed explanation goes here
 
     prompt = sprintf(...
-    ['Folder "%s" already exists.\n' ...
-     '[Y]es – override it;\n'       ...
-     '[N]o – pick another ID;\n'    ...
-     '[E]xit – cancel script.\n'    ...
-     'Your choice [Y/N/E]: '], path_name);
+    ['La catella "%s" esiste già. Sovrascrivere?\n' ...
+     '[Y]es – Sì;\n'       ...
+     '[N]o – scegli altro ID;\n'    ...
+     '[E]xit – Esci.\n'    ...
+     'La tua scelta [Y/N/E]: '], path_name);
 end

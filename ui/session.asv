@@ -33,8 +33,6 @@ function [result, answer, answer_elapsed_time, session_elapsed_time, session_sta
     % Read the image
     %-----------------------
     imageMatrix = imread('speaker_icon_white.png');  % Load your PNG image
-    Screen('PutImage', window, imageMatrix)
-    Screen('Flip', window);
     
     %-----------------------
     % Make texture from the image
