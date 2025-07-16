@@ -1,5 +1,5 @@
 function addDataPeak(obj,h_doc)
-timer_start = tic;
+%timer_start = tic;
 %
 %   Inputs
 %   ------
@@ -253,7 +253,7 @@ catch ME
         obj.error_ME = ME;
     end
 end
-fprintf('COUNT %.3f\n', toc(timer_start));
+%fprintf('COUNT %.3f\n', toc(timer_start));
 end
 
 function data_vector = h__getData(doc,obj,start_I,n_samples)

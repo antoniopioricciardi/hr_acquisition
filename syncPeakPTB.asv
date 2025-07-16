@@ -43,6 +43,8 @@ function syncPeakPTB(new_data, wave, sampling)
     end
 end
 
+def play_twice()
+
 % function syncPeakPTB(new_data, wave, sampling)
 %     global listener sessionActive peak_detected peak_count peak_delay_s player
 %     
