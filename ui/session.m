@@ -5,7 +5,7 @@ function [result, answer, answer_elapsed_time, session_elapsed_time, session_sta
 % returns 1 if the answer is correct ('s' when the delay is low, 's' when
 % it is higher)
 
-    global sessionActive peak_count peak_detected listener
+    global sessionActive peak_count peak_detected listener peak_delay_s
     % reset your counters each time
     peak_count    = 0;
     peak_detected = false;
@@ -47,7 +47,7 @@ function [result, answer, answer_elapsed_time, session_elapsed_time, session_sta
     session_start_time_abs = datetime('now','Format','HH:mm:ss');
 
     session_time_start = tic;
-    % BLOCK here until 10 peaks OR user presses E
+    % BLOCK here until 10 peaks
     sessionActive = true;
     while peak_count < 10
         pause(0.0001)
@@ -57,13 +57,14 @@ function [result, answer, answer_elapsed_time, session_elapsed_time, session_sta
 %             break
 %         end
     end
+    pause(peak_delay_s)
     sessionActive = false;
 
     session_elapsed_time = toc(session_time_start);
     
     session_end_time_abs = datetime('now','Format','HH:mm:ss');
     % SESSION OVER
-
+    
 
     % --- NEW PART: ask async vs sync ---
     Screen('FillRect', window, [0 0 0]);

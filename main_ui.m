@@ -1,8 +1,8 @@
 clear all
 clc
 %% ─── GLOBAL STATE ──────────────────────────────────────────────
-global listener sessionActive peak_count peak_detected peak_delay_s pahandle,
-
+global listener sessionActive peak_count peak_detected peak_delay_s pahandles,
+num_audio_handles = 10;
 PsychDefaultSetup(2);
 
 % load config parameters
@@ -10,7 +10,7 @@ cfg = config();
 num_demo_sessions = cfg.num_demo_sessions;
 tests_per_delay = cfg.tests_per_delay;
 max_peaks = cfg.max_peaks;
-
+sound_pitch = cfg.sound_pitch; % frequency for the thud (Hz)
 sessionActive = true;
 pause(0.5);
 
@@ -32,28 +32,13 @@ d = labchart.getActiveDocument();
     % f = 440; % Frequency of the sine wave (A4 note)
     % sound_y = sin(2 * pi * f * t); % Generate the sine wave
     % sound_Fs = Fs;
-load gong.mat y Fs;
-sound_y = y;
-sound_Fs = Fs;
+%load gong.mat y Fs;
+%sound_y = y;
+%sound_Fs = Fs;
 %end
 
 
-%persistent heartbeat_y heartbeat_Fs;
-sound_length_t = 0.1; % length of the sound (in seconds)
-heartbeat_Fs = 44100; % Sampling frequency
-t = 0:1/heartbeat_Fs:sound_length_t; % Time vector for sound_length_t seconds
-
-% Parameters for the thud
-sound_pitch = cfg.sound_pitch; % frequency for the thud (Hz)
-%f = 200;%60; % Low frequency for the thud (Hz)
-thud = sin(2 * pi * sound_pitch * t); % Low-frequency sine wave
-
-% Apply a Gaussian envelope for attack and decay
-envelope = exp(-10 * t); % Exponential decay
-heartbeat_y = thud .* envelope; % Modulate the sine wave with the envelope
-
-% Normalize the signal to avoid clipping
-heartbeat_y = heartbeat_y / max(abs(heartbeat_y));
+[heartbeat_y, heartbeat_Fs] = create_beep(sound_pitch);
 
 dq = parallel.pool.DataQueue;       % your queue
 peak_delay_s = 0.0;                          % 200 ms  ⇒ 0.20 s
@@ -63,9 +48,9 @@ peak_delay_s = 0.0;                          % 200 ms  ⇒ 0.20 s
 %listener = afterEach(dq, @(chunk) syncPeakNaiveWithListener(...
 %                          chunk, heartbeat_y, heartbeat_Fs));
 % Initialize PsychPortAudio once
-initializePsychAudio(heartbeat_y, heartbeat_Fs);
+initializePsychAudioVector(heartbeat_y, heartbeat_Fs, num_audio_handles);
 global player
-player = audioplayer(heartbeat_y, heartbeat_Fs); 
+%player = audioplayer(heartbeat_y, heartbeat_Fs); 
 listener = afterEach(dq, @(chunk) syncPeakPTB(chunk, heartbeat_y, heartbeat_Fs));
 sessionActive = false;
 
@@ -275,10 +260,10 @@ try
    
     sca;
     delete(timerfind);     % stops the one-shot timers cleanly
-    cleanupPsychAudio()
+    cleanupPsychAudioVector(num_audio_handles)
     %PsychPortAudio('Close', pahandle);
 catch
-    cleanupPsychAudio()
+    cleanupPsychAudioVector(num_audio_handles)
     %this "catch" section executes in case of an error in the "try" section
     %above.  Importantly, it closes the onscreen window if its open.
     sca;
@@ -320,6 +305,63 @@ function syncPeakNaiveWithListener3(new_data, delay, wave, sampling, max_peaks)
     end
 end
 
+% Initialization function (call once at startup)
+function initializePsychAudioVector(wave, sampling, num_handles)
+    global pahandles
+    %fs = 44100;               % Sampling frequency
+    nrChannels = 1;
+    % Fill all handles with the same 440 Hz beep (can be different if needed)
+    %beep = MakeBeep(200, 0.1, fs);
+    %buffer = [beep; beep];  % stereo
+
+    %[wave, sampling] = create_beep()
+
+
+    % Initialize PsychPortAudio
+    InitializePsychSound(1); % 1 = push hard for low latency
+    
+    % Ensure wave is properly formatted
+    % PsychPortAudio expects: rows = channels, columns = samples
+    % Your heartbeat_y should already be a row vector (1 x N)
+    if size(wave, 1) > size(wave, 2)
+        wave = wave'; % Convert column vector to row vector if needed
+    end
+    
+    nchannels = size(wave, 1); % Should be 1 for mono
+    nsamples = size(wave, 2);  % Should be your actual sample count
+    
+    % Create 5 handles (audio devices) for mono playback
+    % Parameters: deviceid, mode, reqlatencyclass, freq, nchannels
+    pahandles = zeros(1, num_handles);
+    for i = 1:num_handles
+        pahandles(i) = PsychPortAudio('Open', [], 1, 1, sampling, nrChannels);
+        PsychPortAudio('Volume', pahandles(i), 1);
+        PsychPortAudio('FillBuffer', pahandles(i), wave);
+    end
+    
+    % Set volume (optional)
+    %PsychPortAudio('Volume', pahandle, 1);
+    
+    fprintf('PsychPortAudio initialized:\n');
+    fprintf('  Sampling rate: %d Hz\n', sampling);
+    fprintf('  Channels: %d\n', nchannels);
+    fprintf('  Samples: %d\n', nsamples);
+    fprintf('  Duration: %.3f s\n', nsamples/sampling);
+end
+
+% Cleanup function (call when done)
+function cleanupPsychAudioVector(num_handles)
+    global pahandles
+    
+    for  i = 1:num_handles
+        if ~isempty(pahandles)
+            PsychPortAudio('Close', pahandles(i));
+            %pahandle = [];
+        end
+    end
+end
+
+
 
 % Initialization function (call once at startup)
 function initializePsychAudio(wave, sampling)
@@ -360,4 +402,24 @@ function cleanupPsychAudio()
         PsychPortAudio('Close', pahandle);
         pahandle = [];
     end
+end
+
+
+function [heartbeat_y, heartbeat_Fs] = create_beep(sound_pitch)
+    %persistent heartbeat_y heartbeat_Fs;
+    sound_length_t = 0.1; % length of the sound (in seconds)
+    heartbeat_Fs = 44100; % Sampling frequency
+    t = 0:1/heartbeat_Fs:sound_length_t; % Time vector for sound_length_t seconds
+    
+    % Parameters for the thud
+    %sound_pitch = cfg.sound_pitch; % frequency for the thud (Hz)
+    %f = 200;%60; % Low frequency for the thud (Hz)
+    thud = sin(2 * pi * sound_pitch * t); % Low-frequency sine wave
+    
+    % Apply a Gaussian envelope for attack and decay
+    envelope = exp(-10 * t); % Exponential decay
+    heartbeat_y = thud .* envelope; % Modulate the sine wave with the envelope
+    
+    % Normalize the signal to avoid clipping
+    heartbeat_y = heartbeat_y / max(abs(heartbeat_y));
 end

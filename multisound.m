@@ -10,7 +10,7 @@ for i = 1:num_handles
 end
 
 % Fill all handles with the same 440 Hz beep (can be different if needed)
-beep = MakeBeep(440, 0.5, fs);
+beep = MakeBeep(440, 0.2, fs);
 buffer = [beep; beep];  % stereo
 for i = 1:num_handles
     PsychPortAudio('FillBuffer', pahandles(i), buffer);
@@ -23,7 +23,7 @@ for i = 1:3
     idx = getFreeHandle(pahandles);
     if idx ~= -1
         fprintf('Using pahandle #%d\n', idx);
-        PsychPortAudio('Start', pahandles(idx), 1, GetSecs + 0.1);
+        PsychPortAudio('Start', pahandles(idx), 1, GetSecs + 2);
     else
         warning('No free audio handle available!');
     end
@@ -31,7 +31,7 @@ for i = 1:3
 end
 
 % Wait for all to finish
-WaitSecs(5);
+WaitSecs(4);
 
 % Close all handles
 for i = 1:num_handles
@@ -44,7 +44,7 @@ function handle_index = getFreeHandle(pahandles)
     handle_index = -1;
     for i = 1:length(pahandles)
         status = PsychPortAudio('GetStatus', pahandles(i));
-        if ~status.Active
+        if ~status.State
             handle_index = i;
             return;
         end
