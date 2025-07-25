@@ -247,31 +247,56 @@ try
         
         fclose(fid);
 
+        % ---- EXIT LOOP ---- 
+        exitLoop = false;
+
+        instr = 'Premi invio per continuare, "E" per uscire';
+        DrawFormattedText(window, instr, 'center','center',[255 255 255]);
+        Screen('Flip', window);
+
+        % Flush any leftover keypresses
+        KbReleaseWait;  
+
+        % Wait for a key
+        while true
+            [keyIsDown, ~, keyCode] = KbCheck;
+            if keyIsDown
+                % Check if they hit 'E' (case‑insensitive)
+                if keyCode(KbName('e')) || keyCode(KbName('E'))
+                    exitLoop = true;
+                end
+                break;
+            end
+        end
+
+        if exitLoop
+            disp('User requested exit. Stopping loop.');
+            break;   % out of the for‐loop
+        end
+        % ---- END EXIT LOOP ----
     end
     % ────────────────────────────────────────────────────────────
-
-    %out = session(window, 'a');
-%     if out == 1
-%         disp('User chose asynchronous as expected.');
-%     else
-%         disp('User chose something else.');
-%     end
-
    
+    % sca;
+    % delete(timerfind);     % stops the one-shot timers cleanly
+    % cleanupPsychAudioVector(num_audio_handles)
+    cleanup_routine();
+catch
+    % cleanupPsychAudioVector(num_audio_handles)
+    %this "catch" section executes in case of an error in the "try" section
+    %above.  Importantly, it closes the onscreen window if its open.
+    % sca;
+    cleanup_routine();
+    psychrethrow(psychlasterror);
+end % try..catch
+
+
+function cleanup_routine()
     sca;
     delete(timerfind);     % stops the one-shot timers cleanly
     cleanupPsychAudioVector(num_audio_handles)
-    %PsychPortAudio('Close', pahandle);
-catch
-    cleanupPsychAudioVector(num_audio_handles)
-    %this "catch" section executes in case of an error in the "try" section
-    %above.  Importantly, it closes the onscreen window if its open.
-    sca;
 
-    psychrethrow(psychlasterror);
-    %PsychPortAudio('Close', pahandle);
-end % try..catch
-
+end
 
 
 % Then in your function:
